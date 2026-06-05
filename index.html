@@ -14,7 +14,6 @@
     }
     html,body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); font-size:13px; }
 
-    /* Header */
     .header { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:1px solid var(--border); }
     .header-title { font-size:13px; font-weight:600; }
     .header-sub { font-size:10px; color:var(--muted); margin-top:1px; }
@@ -22,79 +21,101 @@
     .badge { font-family:'DM Mono',monospace; font-size:10px; padding:2px 7px; border-radius:20px; font-weight:500; }
     .badge-blue   { background:rgba(88,166,255,.15); color:var(--blue);   border:1px solid rgba(88,166,255,.3); }
     .badge-yellow { background:rgba(210,153,34,.15); color:var(--yellow); border:1px solid rgba(210,153,34,.3); }
+    .badge-green  { background:rgba(63,185,80,.15);  color:var(--green);  border:1px solid rgba(63,185,80,.3); }
 
-    /* Stats */
     .stats { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--border); }
     .stat { padding:9px 12px; border-right:1px solid var(--border); }
     .stat:last-child { border-right:none; }
     .stat-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:3px; }
     .stat-value { font-family:'DM Mono',monospace; font-size:16px; font-weight:500; }
     .stat-sub { font-size:10px; color:var(--muted); margin-top:2px; }
-    .warn { color:var(--yellow); }
-    .good { color:var(--green); }
+    .warn { color:var(--yellow); } .good { color:var(--green); } .red { color:var(--red); }
 
-    /* Job rows */
-    .job { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid var(--border); }
-    .job:last-child { border-bottom:none; }
+    .section-title { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; padding:8px 14px 4px; border-bottom:1px solid var(--border); }
+
+    .job, .plac, .note { display:flex; align-items:center; gap:10px; padding:8px 14px; border-bottom:1px solid var(--border); }
+    .job:last-child, .plac:last-child, .note:last-child { border-bottom:none; }
+
     .rag { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
     .rag-green  { background:var(--green);  box-shadow:0 0 5px rgba(63,185,80,.5); }
     .rag-yellow { background:var(--yellow); box-shadow:0 0 5px rgba(210,153,34,.5); }
     .rag-red    { background:var(--red);    box-shadow:0 0 5px rgba(247,129,102,.5); }
-    .job-info { flex:1; min-width:0; }
-    .job-title { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .job-meta  { font-size:10px; color:var(--muted); margin-top:1px; }
-    .job-nums { display:flex; gap:14px; flex-shrink:0; }
+
+    .row-info { flex:1; min-width:0; }
+    .row-title { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .row-meta  { font-size:10px; color:var(--muted); margin-top:1px; }
+    .row-nums { display:flex; gap:14px; flex-shrink:0; }
     .num { text-align:right; }
     .num-val { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
     .num-lbl { font-size:9px; color:var(--muted); }
-    .type-pill { font-family:'DM Mono',monospace; font-size:9px; padding:2px 6px; border-radius:12px; flex-shrink:0; }
-    .pill-perm     { background:rgba(63,185,80,.15);  color:var(--green); border:1px solid rgba(63,185,80,.3); }
-    .pill-contract { background:rgba(88,166,255,.15); color:var(--blue);  border:1px solid rgba(88,166,255,.3); }
+    .pill { font-family:'DM Mono',monospace; font-size:9px; padding:2px 6px; border-radius:12px; flex-shrink:0; }
+    .pill-perm     { background:rgba(63,185,80,.15);  color:var(--green);  border:1px solid rgba(63,185,80,.3); }
+    .pill-contract { background:rgba(88,166,255,.15); color:var(--blue);   border:1px solid rgba(88,166,255,.3); }
+    .pill-soon     { background:rgba(210,153,34,.15); color:var(--yellow); border:1px solid rgba(210,153,34,.3); }
+    .pill-other    { background:rgba(139,148,158,.1); color:var(--muted);  border:1px solid var(--border); }
 
-    /* States */
-    .state { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:28px 20px; min-height:140px; }
+    .state { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:28px 20px; }
     .state-msg { font-size:11px; color:var(--muted); text-align:center; }
     .spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin .75s linear infinite; }
     @keyframes spin { to{transform:rotate(360deg)} }
   </style>
 </head>
 <body>
-
   <div id="root"><div class="state"><div class="spinner"></div><div class="state-msg">Loading…</div></div></div>
 
 <script>
   const getParam = k => new URLSearchParams(location.search).get(k);
   const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const ONE_DAY = 86400000;
+  const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}) : '—';
 
   let attempts = 0;
   function register() {
     attempts++;
     postRobot.sendToParent('register', { title: 'Account Management' }, { timeout: 5000 })
       .then(() => run())
-      .catch(() => { if (attempts < 4) setTimeout(register, 500); else show('<div class="state"><div class="state-msg">No AppBridge connection</div></div>'); });
+      .catch(() => { if (attempts < 4) setTimeout(register, 500); else show('<div class="state"><div class="state-msg">No AppBridge</div></div>'); });
+  }
+
+  function bhPost(relativeURL, data) {
+    return postRobot.sendToParent('httpPOST', { relativeURL, data }, { timeout: 20000 })
+      .then(evt => evt.data.data.data || []); // confirmed shape: evt.data.data.data = array
+  }
+
+  function bhGet(relativeURL) {
+    return postRobot.sendToParent('httpGET', { relativeURL }, { timeout: 20000 })
+      .then(evt => evt.data.data || {});
   }
 
   async function run() {
     const entityId = parseInt(getParam('EntityID'), 10);
     try {
-      const evt = await postRobot.sendToParent('httpPOST', {
-        relativeURL: 'search/JobOrder',
-        data: {
-          query: 'clientCorporation.id:' + entityId + ' AND isDeleted:false AND isOpen:true',
-          fields: 'id,title,status,employmentType,dateAdded,owner(id,firstName,lastName),submissions[100](dateAdded,status),placements[50](dateAdded)',
-          count: 200,
-          start: 0,
-          sort: '-dateAdded'
-        }
-      }, { timeout: 20000 });
+      // All three use confirmed working patterns
+      const [jobs, placements, notesRes] = await Promise.all([
 
-      // Shape confirmed: evt.data.data.data = array
-      const jobs = evt.data.data.data || [];
-      render(jobs);
+        // 1. Open jobs — confirmed working
+        bhPost('search/JobOrder', {
+          query: `clientCorporation.id:${entityId} AND isDeleted:false AND isOpen:true`,
+          fields: 'id,title,status,employmentType,dateAdded,owner(id,firstName,lastName),submissions[100](dateAdded,status),placements[50](dateAdded)',
+          count: 200, start: 0, sort: '-dateAdded'
+        }),
+
+        // 2. Placements — same POST pattern, filter by company
+        bhPost('search/Placement', {
+          query: `clientCorporation.id:${entityId} AND isDeleted:false`,
+          fields: 'id,status,employmentType,dateAdded,endDate,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName),customText1',
+          count: 200, start: 0, sort: '-dateAdded'
+        }),
+
+        // 3. Notes — dedicated endpoint, bhGet shape
+        bhGet(`allCorpNotes?clientCorpId=${entityId}&fields=id,dateAdded,action,commentingPerson(id,firstName,lastName),comments&count=5&start=0&sort=-dateAdded`),
+
+      ]);
+
+      render(entityId, jobs, placements, notesRes);
     } catch(err) {
       show('<div class="state"><div class="state-msg">Error: ' + esc(err.message) + '</div></div>');
-      console.error(err);
+      console.error('AccountCard error:', err);
     }
   }
 
@@ -106,60 +127,131 @@
     const lastSub  = subs.length ? Math.round((now - Math.max(...subs.map(s=>s.dateAdded))) / ONE_DAY) : daysOpen;
     const interviews = subs.filter(s => /interview|1st|2nd|3rd|shortlist/i.test(s.status||'')).length;
     let rag = 'green';
-    if      (placs.length)                              rag = 'green';
+    if      (placs.length)                                    rag = 'green';
     else if (daysOpen > 60 || (lastSub > 14 && subs.length)) rag = 'red';
-    else if (daysOpen > 30 || lastSub > 7)              rag = 'yellow';
+    else if (daysOpen > 30 || lastSub > 7)                   rag = 'yellow';
     return { daysOpen, subs: subs.length, interviews, placs: placs.length, rag };
   }
 
-  function render(jobs) {
-    const metrics = jobs.map(j => ({ j, m: ragFor(j) }));
-    const totSubs  = metrics.reduce((s,x) => s + x.m.subs, 0);
-    const totInt   = metrics.reduce((s,x) => s + x.m.interviews, 0);
-    const totPlac  = metrics.reduce((s,x) => s + x.m.placs, 0);
-    const atRisk   = metrics.filter(x => x.m.rag === 'red').length;
+  function render(entityId, jobs, placements, notesRes) {
+    const now = Date.now();
 
-    const header = `
-      <div class="header">
-        <div><div class="header-title">Open Jobs</div><div class="header-sub">${jobs.length} job${jobs.length!==1?'s':''} · this account</div></div>
-        <div class="badges">
-          <span class="badge badge-blue">${jobs.length} open</span>
-          ${atRisk ? `<span class="badge badge-yellow">${atRisk} at risk</span>` : ''}
+    // ── Open jobs ──
+    const jobMetrics = jobs.map(j => ({ j, m: ragFor(j) }));
+    const totSubs     = jobMetrics.reduce((s,x) => s + x.m.subs, 0);
+    const totInt      = jobMetrics.reduce((s,x) => s + x.m.interviews, 0);
+    const totPlacOpen = jobMetrics.reduce((s,x) => s + x.m.placs, 0);
+    const atRisk      = jobMetrics.filter(x => x.m.rag === 'red').length;
+
+    // ── Placements ──
+    const active = placements.filter(p => {
+      const st = (p.status||'').toLowerCase();
+      return st === 'approved' || st === 'active' || (p.endDate && p.endDate > now);
+    });
+    const totalPlacs = placements.length;
+
+    // ── Notes ──
+    const notes = notesRes.data || [];
+
+    // ── Stats ──
+    const statsHtml = `
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Open Jobs</div>
+          <div class="stat-value">${jobs.length}</div>
+          <div class="stat-sub">${atRisk ? `<span class="warn">${atRisk} at risk</span>` : 'all active'}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">CVs Sent</div>
+          <div class="stat-value">${totSubs}</div>
+          <div class="stat-sub">${totInt} at interview</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Contractors</div>
+          <div class="stat-value ${active.length ? 'good' : ''}">${active.length}</div>
+          <div class="stat-sub">active on-site</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">All Placements</div>
+          <div class="stat-value good">${totalPlacs}</div>
+          <div class="stat-sub">all time</div>
         </div>
       </div>`;
 
-    const stats = `
-      <div class="stats">
-        <div class="stat"><div class="stat-label">Open Jobs</div><div class="stat-value">${jobs.length}</div></div>
-        <div class="stat"><div class="stat-label">Total CVs</div><div class="stat-value">${totSubs}</div></div>
-        <div class="stat"><div class="stat-label">Interviews</div><div class="stat-value">${totInt}</div></div>
-        <div class="stat"><div class="stat-label">Placements</div><div class="stat-value ${totPlac?'good':''}">${totPlac}</div></div>
-      </div>`;
-
-    const rows = metrics.length ? metrics.map(({j, m}, i) => {
-      const owner = j.owner ? j.owner.firstName + ' ' + j.owner.lastName : '—';
+    // ── Job rows ──
+    const jobRows = jobMetrics.map(({j, m}, i) => {
+      const owner = j.owner ? `${j.owner.firstName} ${j.owner.lastName}` : '—';
       const isPerm = /perm|direct/i.test(j.employmentType||'');
       return `
-        <div class="job" style="animation-delay:${i*25}ms">
+        <div class="job">
           <div class="rag rag-${m.rag}"></div>
-          <div class="job-info">
-            <div class="job-title">${esc(j.title||'Untitled')}</div>
-            <div class="job-meta">${esc(owner)} · ${m.daysOpen}d open</div>
+          <div class="row-info">
+            <div class="row-title">${esc(j.title||'Untitled')}</div>
+            <div class="row-meta">${esc(owner)} · ${m.daysOpen}d open</div>
           </div>
-          <div class="job-nums">
+          <div class="row-nums">
             <div class="num"><div class="num-val ${m.subs===0?'warn':''}">${m.subs}</div><div class="num-lbl">CVs</div></div>
             <div class="num"><div class="num-val">${m.interviews}</div><div class="num-lbl">Intrvw</div></div>
             <div class="num"><div class="num-val ${m.placs?'good':''}">${m.placs}</div><div class="num-lbl">Placed</div></div>
           </div>
-          <span class="type-pill ${isPerm?'pill-perm':'pill-contract'}">${esc(j.employmentType||'—')}</span>
+          <span class="pill ${isPerm?'pill-perm':'pill-contract'}">${esc(j.employmentType||'—')}</span>
         </div>`;
-    }).join('') : '<div class="state"><div class="state-msg">No open jobs for this account.</div></div>';
+    }).join('') || '<div class="state"><div class="state-msg">No open jobs</div></div>';
 
-    show(header + stats + rows);
+    // ── Contractor rows ──
+    const contractorRows = active.length ? active.slice(0,8).map(p => {
+      const name    = p.candidate ? `${p.candidate.firstName} ${p.candidate.lastName}` : '—';
+      const role    = p.jobOrder?.title || '—';
+      const owner   = p.owner ? `${p.owner.firstName} ${p.owner.lastName}` : '—';
+      const daysLeft = p.endDate ? Math.round((p.endDate - now) / ONE_DAY) : null;
+      const ragClass = daysLeft === null ? 'rag-yellow' : daysLeft < 0 ? 'rag-red' : daysLeft < 30 ? 'rag-yellow' : 'rag-green';
+      const pillClass = daysLeft === null ? 'pill-other' : daysLeft < 30 ? 'pill-soon' : 'pill-contract';
+      const pillLabel = daysLeft === null ? 'No end date' : daysLeft < 0 ? 'Ended' : `${daysLeft}d left`;
+      return `
+        <div class="plac">
+          <div class="rag ${ragClass}"></div>
+          <div class="row-info">
+            <div class="row-title">${esc(name)}</div>
+            <div class="row-meta">${esc(role)} · ${esc(owner)}</div>
+          </div>
+          <span class="pill ${pillClass}">${pillLabel}</span>
+        </div>`;
+    }).join('') : '<div class="state"><div class="state-msg">No active contractors found</div></div>';
+
+    // ── Note rows ──
+    const noteRows = notes.length ? notes.map(n => {
+      const who  = n.commentingPerson ? `${n.commentingPerson.firstName} ${n.commentingPerson.lastName}` : '—';
+      const when = fmtDate(n.dateAdded);
+      const body = (n.comments||n.action||'').replace(/<[^>]+>/g,'').substring(0,80);
+      return `
+        <div class="note">
+          <div class="row-info">
+            <div class="row-title">${esc(n.action||'Note')}</div>
+            <div class="row-meta">${esc(who)} · ${when}${body ? ' — ' + esc(body) : ''}</div>
+          </div>
+        </div>`;
+    }).join('') : '<div class="state"><div class="state-msg">No notes found</div></div>';
+
+    show(`
+      <div class="header">
+        <div><div class="header-title">Account Management</div><div class="header-sub">MoneyCorp · ${jobs.length} open jobs · ${active.length} contractors</div></div>
+        <div class="badges">
+          ${jobs.length ? `<span class="badge badge-blue">${jobs.length} open</span>` : ''}
+          ${atRisk ? `<span class="badge badge-yellow">${atRisk} at risk</span>` : ''}
+          ${active.length ? `<span class="badge badge-green">${active.length} on-site</span>` : ''}
+        </div>
+      </div>
+      ${statsHtml}
+      <div class="section-title">Open Jobs</div>
+      ${jobRows}
+      <div class="section-title">Active Contractors</div>
+      ${contractorRows}
+      <div class="section-title">Recent Activity</div>
+      ${noteRows}
+    `);
   }
 
   function show(html) { document.getElementById('root').innerHTML = html; }
-
   window.addEventListener('load', register);
 </script>
 </body>
