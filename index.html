@@ -5,351 +5,300 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Account Management</title>
   <script src="//cdn.rawgit.com/krakenjs/post-robot/7da06445/dist/post-robot.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     :root {
-      --blue: #0d6dcd; --blue-bg: #e8f1fb;
-      --green: #1a7f4b; --green-bg: #e6f4ed;
-      --amber: #a35c00; --amber-bg: #fef3e2;
-      --red: #b91c1c; --red-bg: #fef2f2;
-      --border: #e2e8f0; --text: #1e293b; --muted: #64748b;
-      --bg: #ffffff; --surface: #f8fafc; --radius: 6px;
+      --bg:#0d1117; --surface:#161b22; --surface2:#1c2128; --border:#21262d;
+      --text:#e6edf3; --muted:#8b949e;
+      --blue:#58a6ff; --green:#3fb950; --yellow:#d29922; --red:#f78166; --purple:#bc8cff;
     }
-    body { font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif; font-size: 13px; color: var(--text); background: var(--bg); }
+    html,body { height:100%; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); font-size:13px; }
+    body { display:flex; flex-direction:column; }
 
-    /* States */
-    .state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px 20px; min-height: 180px; }
-    .state-title { font-size: 13px; font-weight: 600; }
-    .state-msg { font-size: 12px; color: var(--muted); text-align: center; max-width: 280px; line-height: 1.6; }
-    .spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .75s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .retry-btn { padding: 5px 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: inherit; font-size: 11px; border-radius: var(--radius); cursor: pointer; }
-    .retry-btn:hover { border-color: var(--blue); color: var(--blue); }
-    .hidden { display: none !important; }
+    /* ── Header ── */
+    .header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .header-left { display:flex; align-items:center; gap:9px; }
+    .header-icon { width:26px; height:26px; background:linear-gradient(135deg,var(--blue),var(--purple)); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+    .header-title { font-size:13px; font-weight:600; }
+    .header-sub { font-size:10px; color:var(--muted); margin-top:1px; }
+    .badges { display:flex; gap:5px; flex-shrink:0; }
+    .badge { font-family:'DM Mono',monospace; font-size:10px; padding:2px 7px; border-radius:20px; font-weight:500; }
+    .badge-green  { background:rgba(63,185,80,.15);  color:var(--green);  border:1px solid rgba(63,185,80,.3); }
+    .badge-blue   { background:rgba(88,166,255,.15); color:var(--blue);   border:1px solid rgba(88,166,255,.3); }
+    .badge-yellow { background:rgba(210,153,34,.15); color:var(--yellow); border:1px solid rgba(210,153,34,.3); }
 
-    /* Card */
-    #card { display: none; }
-    #card.visible { display: block; }
+    /* ── Stats ── */
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--border); flex-shrink:0; }
+    .stat { padding:9px 12px; border-right:1px solid var(--border); }
+    .stat:last-child { border-right:none; }
+    .stat-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:3px; }
+    .stat-value { font-family:'DM Mono',monospace; font-size:16px; font-weight:500; line-height:1; }
+    .stat-delta { font-size:10px; margin-top:3px; color:var(--muted); }
+    .up   { color:var(--green); }
+    .down { color:var(--red); }
+    .warn { color:var(--yellow); }
 
-    /* Header */
-    .hdr { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 14px 10px; border-bottom: 1px solid var(--border); }
-    .hdr-name { font-size: 14px; font-weight: 600; }
-    .hdr-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .hdr-right { text-align: right; font-size: 12px; color: var(--muted); flex-shrink: 0; }
-    .hdr-right strong { display: block; font-size: 13px; font-weight: 500; color: var(--text); }
+    /* ── Jobs list ── */
+    .jobs-list { flex:1; overflow-y:auto; min-height:0; }
+    .jobs-list::-webkit-scrollbar { width:3px; }
+    .jobs-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-    /* Section */
-    .sec { padding: 12px 14px 14px; }
-    .sec + .sec { border-top: 1px solid var(--border); }
-    .sec-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 10px; }
+    .job-row { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid var(--border); animation:fadeIn .15s ease both; }
+    .job-row:last-child { border-bottom:none; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(2px)} to{opacity:1;transform:none} }
 
-    /* Metric grid */
-    .metrics { display: grid; gap: 8px; }
-    .m3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
-    .m4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
-    .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
-    .metric-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
-    .metric-value { font-size: 20px; font-weight: 600; line-height: 1.1; }
-    .metric-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .c-amber { color: var(--amber); }
-    .c-red   { color: var(--red);   }
-    .c-green { color: var(--green); }
+    .job-rag { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .rag-green  { background:var(--green); box-shadow:0 0 5px rgba(63,185,80,.5); }
+    .rag-yellow { background:var(--yellow); box-shadow:0 0 5px rgba(210,153,34,.5); }
+    .rag-red    { background:var(--red); box-shadow:0 0 5px rgba(247,129,102,.5); }
 
-    /* Jobs table */
-    .tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-    .tbl th { font-size: 10px; font-weight: 600; color: var(--muted); text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-    .tbl td { padding: 6px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .tbl tr:last-child td { border-bottom: none; }
-    .tbl td.muted { color: var(--muted); }
-    .tbl td.num { text-align: right; font-weight: 500; }
+    .job-info { flex:1; min-width:0; }
+    .job-title { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .job-meta  { font-size:10px; color:var(--muted); margin-top:1px; }
 
-    /* Pills */
-    .pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 20px; line-height: 1.6; white-space: nowrap; }
-    .p-green { background: var(--green-bg); color: var(--green); }
-    .p-amber { background: var(--amber-bg); color: var(--amber); }
-    .p-red   { background: var(--red-bg);   color: var(--red);   }
-    .p-blue  { background: var(--blue-bg);  color: var(--blue);  }
-    .p-gray  { background: var(--surface);  color: var(--muted); border: 1px solid var(--border); }
+    .job-stats { display:flex; gap:12px; flex-shrink:0; }
+    .job-stat { text-align:right; }
+    .job-stat-val { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
+    .job-stat-lbl { font-size:9px; color:var(--muted); }
 
-    /* Bar */
-    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-    .bar-name { font-size: 12px; color: var(--muted); width: 130px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bar-track { flex: 1; background: var(--border); border-radius: 3px; height: 7px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 3px; background: var(--blue); }
-    .bar-val { font-size: 12px; font-weight: 500; width: 32px; text-align: right; color: var(--muted); flex-shrink: 0; }
+    .job-badge { font-family:'DM Mono',monospace; font-size:9px; padding:2px 6px; border-radius:12px; font-weight:500; flex-shrink:0; }
 
-    /* Flag */
-    .flag { display: flex; gap: 8px; padding: 6px 9px; border-radius: var(--radius); font-size: 12px; line-height: 1.4; margin-bottom: 6px; }
-    .flag:last-child { margin-bottom: 0; }
-    .f-red   { background: var(--red-bg);   color: #7f1d1d; border-left: 3px solid var(--red);   }
-    .f-amber { background: var(--amber-bg); color: #78350f; border-left: 3px solid var(--amber); }
-    .f-green { background: var(--green-bg); color: #14532d; border-left: 3px solid var(--green); }
+    /* ── States ── */
+    .state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:20px; }
+    .state-msg { font-size:11px; color:var(--muted); text-align:center; max-width:260px; line-height:1.6; }
+    .state-title { font-size:13px; font-weight:600; }
+    .spinner { width:22px; height:22px; border:2px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin .75s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .retry-btn { padding:5px 14px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:11px; border-radius:6px; cursor:pointer; }
+    .retry-btn:hover { border-color:var(--blue); color:var(--blue); }
+    .hidden { display:none !important; }
   </style>
 </head>
 <body>
 
-<div class="state" id="stateLoading"><div class="spinner"></div><div class="state-msg">Loading…</div></div>
-<div class="state hidden" id="stateNoConn"><div class="state-title">Not connected</div><div class="state-msg">Open this card from a Client Corporation record.</div></div>
-<div class="state hidden" id="stateError"><div class="state-title">Error</div><div class="state-msg" id="errMsg"></div><button class="retry-btn" onclick="init()">Retry</button></div>
-
-<div id="card">
-  <div class="hdr">
-    <div>
-      <div class="hdr-name" id="corpName">—</div>
-      <div class="hdr-meta" id="corpMeta">—</div>
+  <div class="header hidden" id="header">
+    <div class="header-left">
+      <div class="header-icon">🏢</div>
+      <div>
+        <div class="header-title" id="corpName">—</div>
+        <div class="header-sub" id="corpSub">—</div>
+      </div>
     </div>
-    <div class="hdr-right">Open jobs<strong id="hdrJobCount">—</strong></div>
-  </div>
-
-  <!-- Pipeline summary -->
-  <div class="sec">
-    <div class="sec-title">Pipeline</div>
-    <div class="metrics m4">
-      <div class="metric"><div class="metric-label">Open jobs</div><div class="metric-value" id="mJobs">—</div><div class="metric-sub" id="mJobsSub"></div></div>
-      <div class="metric"><div class="metric-label">Submissions</div><div class="metric-value" id="mSubs">—</div><div class="metric-sub" id="mSubsSub"></div></div>
-      <div class="metric"><div class="metric-label">Interviews</div><div class="metric-value" id="mInterviews">—</div><div class="metric-sub">at interview stage</div></div>
-      <div class="metric"><div class="metric-label">Placements</div><div class="metric-value" id="mPlacs">—</div><div class="metric-sub" id="mPlacsSub"></div></div>
+    <div class="badges">
+      <span class="badge badge-blue hidden" id="badgeOpen"></span>
+      <span class="badge badge-yellow hidden" id="badgeAtRisk"></span>
     </div>
   </div>
 
-  <!-- Jobs breakdown -->
-  <div class="sec">
-    <div class="sec-title">Open jobs breakdown</div>
-    <div id="typeBar"></div>
-    <table class="tbl">
-      <thead><tr><th>Job title</th><th>Owner</th><th>Type</th><th>Days open</th><th style="text-align:right">CVs</th><th style="text-align:right">Interviews</th><th>RAG</th></tr></thead>
-      <tbody id="jobRows"></tbody>
-    </table>
+  <div class="stats hidden" id="stats">
+    <div class="stat">
+      <div class="stat-label">Open Jobs</div>
+      <div class="stat-value" id="sJobs">—</div>
+      <div class="stat-delta" id="dJobs"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total CVs</div>
+      <div class="stat-value" id="sSubs">—</div>
+      <div class="stat-delta" id="dSubs"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Interviews</div>
+      <div class="stat-value" id="sInterviews">—</div>
+      <div class="stat-delta" id="dInterviews"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Placements</div>
+      <div class="stat-value" id="sPlacs">—</div>
+      <div class="stat-delta" id="dPlacs"></div>
+    </div>
   </div>
 
-  <!-- Account health flags -->
-  <div class="sec">
-    <div class="sec-title">Account health</div>
-    <div id="flags"></div>
+  <div class="jobs-list hidden" id="jobsList"></div>
+
+  <div class="state" id="stateLoading">
+    <div class="spinner"></div>
+    <div class="state-msg">Loading account data…</div>
   </div>
-</div>
+  <div class="state hidden" id="stateNoConn">
+    <div class="state-title">Not connected</div>
+    <div class="state-msg">Open this card from a Client Corporation record.</div>
+  </div>
+  <div class="state hidden" id="stateError">
+    <div class="state-title">Could not load data</div>
+    <div class="state-msg" id="errMsg"></div>
+    <button class="retry-btn" onclick="init()">Retry</button>
+  </div>
 
 <script>
+  // ── Exact AppBridge pattern from working jobs card ─────────────────
   const ONE_DAY = 86400000;
   const getParam = k => new URLSearchParams(location.search).get(k);
-  const daysSince = ts => Math.max(0, Math.round((Date.now() - ts) / ONE_DAY));
+  const daysSince = ts => Math.round((Date.now() - ts) / ONE_DAY);
   const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  // ── AppBridge ──────────────────────────────────────────────────────
   let regAttempts = 0;
+  const MAX_REG = 4;
 
   function register() {
     regAttempts++;
-    postRobot.sendToParent('register', { title: 'Account Management' }, { timeout: 6000 })
+    postRobot.sendToParent('register', { title: 'Account Management' }, { timeout: 5000 })
       .then(() => onRegistered(true))
       .catch(() => {
-        if (regAttempts < 5) setTimeout(register, 600);
+        if (regAttempts < MAX_REG) setTimeout(register, 500);
         else onRegistered(false);
       });
   }
 
-  function bhGet(url) {
-    return postRobot.sendToParent('httpGET', { relativeURL: url }, { timeout: 20000 })
+  // Identical to jobs card
+  function bhGet(relativeURL) {
+    return postRobot.sendToParent('httpGET', { relativeURL }, { timeout: 20000 })
       .then(evt => {
         const p = evt.data;
         if (!p) throw new Error('Empty response');
         if (p.error) throw new Error(JSON.stringify(p.error));
-        return p.data;
+        return p;
       });
   }
 
-  function bhPost(url, body) {
-    return postRobot.sendToParent('httpPOST', { relativeURL: url, data: body }, { timeout: 20000 })
+  function bhPost(relativeURL, body) {
+    return postRobot.sendToParent('httpPOST', { relativeURL, data: body }, { timeout: 20000 })
       .then(evt => {
         const p = evt.data;
         if (!p) throw new Error('Empty response');
         if (p.error) throw new Error(JSON.stringify(p.error));
-        return p.data;
+        return p;
       });
   }
 
-  // ── API — only patterns confirmed working from the jobs card ──────
-  async function fetchCorp(id) {
-    // Bare minimum fields only
-    const res = await bhGet(`entity/ClientCorporation/${id}?fields=id,name&meta=off`);
-    return res.data || res;
-  }
-
-  async function fetchOpenJobs(corpId) {
-    // Confirmed working: search/JobOrder via httpPOST with nested submission/placement counts
-    const res = await bhPost('search/JobOrder', {
+  // ── Data — same fields as jobs card, scoped to company ────────────
+  // Jobs card fetches: entity/JobOrder/{id} + search/JobOrder (for similar jobs)
+  // Here we just use search/JobOrder for all jobs at this company — identical POST shape
+  async function fetchCompanyJobs(corpId) {
+    const data = await bhPost('search/JobOrder', {
       query: `clientCorporation.id:${corpId} AND isDeleted:false AND isOpen:true`,
       fields: [
         'id','title','status','employmentType','dateAdded',
         'owner(id,firstName,lastName)',
-        'submissions[100](id,dateAdded,status)',
-        'placements[50](id,dateAdded,status)',
-        'categories(name)'
+        'submissions[100](dateAdded,status,jobOrder(id))',
+        'placements[50](dateAdded,jobOrder(id))'
       ].join(','),
       count: 200,
       start: 0,
       sort: '-dateAdded'
     });
-    return res.data || [];
+    return data.data || [];
   }
 
-  async function fetchAllJobs(corpId) {
-    // For fill rate — just IDs and placement count
-    const res = await bhPost('search/JobOrder', {
-      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
-      fields: 'id,status,placements[1](id)',
-      count: 500,
-      start: 0
-    });
-    return res.data || [];
-  }
-
-  // ── Analysis ──────────────────────────────────────────────────────
-  function analyse(corp, openJobs, allJobs) {
+  // ── Analysis — per-job RAG, same logic as jobs card ───────────────
+  function analyseJob(j) {
     const now = Date.now();
+    const subs  = j.submissions?.data || [];
+    const placs = j.placements?.data  || [];
+    const daysOpen = Math.round((now - j.dateAdded) / ONE_DAY);
 
-    // Per-job metrics
-    const jobRows = openJobs.map(j => {
-      const subs = j.submissions?.data || [];
-      const placs = j.placements?.data || [];
-      const daysOpen = daysSince(j.dateAdded);
+    const interviews = subs.filter(s => {
+      const st = (s.status||'').toLowerCase();
+      return st.includes('interview') || st.includes('1st') || st.includes('2nd') || st.includes('3rd') || st.includes('shortlist');
+    }).length;
 
-      const interviews = subs.filter(s => {
-        const st = (s.status||'').toLowerCase();
-        return st.includes('interview') || st.includes('1st') || st.includes('2nd') || st.includes('3rd') || st.includes('shortlist');
-      }).length;
+    const subDates = subs.map(s => s.dateAdded).sort((a,b) => b-a);
+    const daysSinceSub = subDates.length ? Math.round((now - subDates[0]) / ONE_DAY) : daysOpen;
 
-      const daysSinceSub = subs.length
-        ? daysSince(Math.max(...subs.map(s => s.dateAdded)))
-        : daysOpen;
+    let rag;
+    if (placs.length > 0)                                    rag = 'green';
+    else if (daysOpen > 60 || (daysSinceSub > 14 && subs.length > 0)) rag = 'red';
+    else if (daysOpen > 30 || daysSinceSub > 7)              rag = 'yellow';
+    else                                                     rag = 'green';
 
-      let rag, ragClass;
-      if (placs.length > 0) {
-        rag = 'Filled'; ragClass = 'p-blue';
-      } else if (daysOpen > 60 || (daysSinceSub > 14 && subs.length > 0)) {
-        rag = 'At risk'; ragClass = 'p-red';
-      } else if (daysOpen > 30 || daysSinceSub > 7) {
-        rag = 'Review'; ragClass = 'p-amber';
-      } else {
-        rag = 'On track'; ragClass = 'p-green';
-      }
-
-      return {
-        id: j.id,
-        title: j.title || `Job #${j.id}`,
-        owner: j.owner ? `${j.owner.firstName} ${j.owner.lastName}` : '—',
-        type: j.employmentType || '—',
-        daysOpen,
-        subsCount: subs.length,
-        interviews,
-        placsCount: placs.length,
-        rag, ragClass,
-        categories: j.categories?.data || [],
-      };
-    });
-
-    // Totals
-    const totalSubs      = jobRows.reduce((s,j) => s + j.subsCount, 0);
-    const totalInterviews= jobRows.reduce((s,j) => s + j.interviews, 0);
-    const totalPlacs     = jobRows.reduce((s,j) => s + j.placsCount, 0);
-    const openPerm       = jobRows.filter(j => (j.type||'').toLowerCase().includes('perm') || (j.type||'').toLowerCase().includes('direct')).length;
-    const openContract   = jobRows.length - openPerm;
-
-    // Type breakdown bars
-    const typeCounts = {};
-    jobRows.forEach(j => { typeCounts[j.type] = (typeCounts[j.type]||0) + 1; });
-    const typeBreakdown = Object.entries(typeCounts).sort((a,b) => b[1]-a[1]);
-
-    // Fill rate (all-time)
-    const totalJobCount  = allJobs.length;
-    const filledJobCount = allJobs.filter(j => (j.placements?.data||[]).length > 0).length;
-    const fillRate = totalJobCount > 0 ? Math.round(filledJobCount / totalJobCount * 100) : null;
-
-    // Flags
-    const flags = [];
-    const atRisk = jobRows.filter(j => j.ragClass === 'p-red');
-    atRisk.forEach(j => flags.push({ type:'red', msg:`${j.title} — ${j.daysOpen} days open, pipeline stalling` }));
-
-    const stalledPipeline = jobRows.filter(j => j.subsCount === 0 && j.daysOpen > 7);
-    stalledPipeline.forEach(j => {
-      if (!atRisk.find(r => r.id === j.id))
-        flags.push({ type:'amber', msg:`${j.title} — no CVs sent yet (${j.daysOpen} days open)` });
-    });
-
-    if (fillRate !== null && fillRate < 30 && totalJobCount > 5)
-      flags.push({ type:'amber', msg:`${fillRate}% historical fill rate (${filledJobCount}/${totalJobCount} jobs) — review brief quality` });
-
-    if (flags.length === 0)
-      flags.push({ type:'green', msg:'No issues flagged — all jobs active' });
-
-    return { corp, jobRows, totalSubs, totalInterviews, totalPlacs, openPerm, openContract, typeBreakdown, fillRate, filledJobCount, totalJobCount };
+    return { subs: subs.length, interviews, placs: placs.length, daysOpen, daysSinceSub, rag };
   }
 
   // ── Render ────────────────────────────────────────────────────────
-  function render(d) {
-    const owner = null;
+  function render(corpId, jobs) {
+    const analysed = jobs.map(j => ({ job: j, metrics: analyseJob(j) }));
 
-    document.getElementById('corpName').textContent = d.corp.name || `Corp #${d.corp.id}`;
-    document.getElementById('corpMeta').textContent = '';
-    document.getElementById('hdrJobCount').textContent = d.jobRows.length;
+    const totSubs       = analysed.reduce((s,a) => s + a.metrics.subs, 0);
+    const totInterviews = analysed.reduce((s,a) => s + a.metrics.interviews, 0);
+    const totPlacs      = analysed.reduce((s,a) => s + a.metrics.placs, 0);
+    const atRisk        = analysed.filter(a => a.metrics.rag === 'red').length;
 
-    // Pipeline metrics
-    document.getElementById('mJobs').textContent       = d.jobRows.length;
-    document.getElementById('mJobsSub').textContent    = `${d.openPerm} perm · ${d.openContract} contract`;
-    document.getElementById('mSubs').textContent       = d.totalSubs;
-    document.getElementById('mSubsSub').textContent    = `across all open jobs`;
-    document.getElementById('mInterviews').textContent = d.totalInterviews;
-    document.getElementById('mPlacs').textContent      = d.totalPlacs;
-    document.getElementById('mPlacsSub').textContent   = d.fillRate !== null ? `${d.fillRate}% all-time fill rate` : '';
+    // Header
+    document.getElementById('corpName').textContent = `Company #${corpId}`;
+    document.getElementById('corpSub').textContent  = `${jobs.length} open job${jobs.length !== 1 ? 's' : ''}`;
+    if (jobs.length) {
+      const b = document.getElementById('badgeOpen');
+      b.textContent = `${jobs.length} open`;
+      b.classList.remove('hidden');
+    }
+    if (atRisk) {
+      const b = document.getElementById('badgeAtRisk');
+      b.textContent = `${atRisk} at risk`;
+      b.classList.remove('hidden');
+    }
 
-    // Type bars
-    const maxType = d.typeBreakdown.length ? d.typeBreakdown[0][1] : 1;
-    document.getElementById('typeBar').innerHTML = d.typeBreakdown.map(([name, count]) => `
-      <div class="bar-row">
-        <div class="bar-name">${esc(name)}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxType*100)}%"></div></div>
-        <div class="bar-val">${count}</div>
-      </div>`).join('');
+    // Stats
+    document.getElementById('sJobs').textContent       = jobs.length;
+    document.getElementById('sSubs').textContent       = totSubs;
+    document.getElementById('sInterviews').textContent = totInterviews;
+    document.getElementById('sPlacs').textContent      = totPlacs;
+    document.getElementById('dJobs').innerHTML         = `<span class="${atRisk ? 'warn' : 'up'}">${atRisk} at risk</span>`;
+    document.getElementById('dSubs').innerHTML         = totSubs > 0 ? `<span>across all jobs</span>` : `<span class="warn">none sent</span>`;
+    document.getElementById('dInterviews').textContent = 'at interview stage';
+    document.getElementById('dPlacs').textContent      = 'this account';
 
-    // Jobs table
-    document.getElementById('jobRows').innerHTML = d.jobRows.length
-      ? d.jobRows.map(j => `
-        <tr>
-          <td>${esc(j.title)}</td>
-          <td class="muted">${esc(j.owner)}</td>
-          <td class="muted">${esc(j.type)}</td>
-          <td class="muted ${j.daysOpen > 60 ? 'c-red' : j.daysOpen > 30 ? 'c-amber' : ''}">${j.daysOpen}d</td>
-          <td class="num">${j.subsCount}</td>
-          <td class="num">${j.interviews}</td>
-          <td><span class="pill ${j.ragClass}">${esc(j.rag)}</span></td>
-        </tr>`).join('')
-      : `<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted);">No open jobs</td></tr>`;
+    // Jobs list
+    const list = document.getElementById('jobsList');
+    if (!analysed.length) {
+      list.innerHTML = `<div class="state"><div class="state-msg">No open jobs for this account.</div></div>`;
+    } else {
+      list.innerHTML = analysed.map(({ job: j, metrics: m }, i) => {
+        const owner = j.owner ? `${j.owner.firstName} ${j.owner.lastName}` : '—';
+        const type  = j.employmentType || '—';
+        const badgeCls = type.toLowerCase().includes('perm') ? 'badge-green' : 'badge-blue';
+        return `
+          <div class="job-row" style="animation-delay:${i*30}ms">
+            <div class="job-rag rag-${m.rag}"></div>
+            <div class="job-info">
+              <div class="job-title">${esc(j.title || 'Untitled')}</div>
+              <div class="job-meta">${esc(owner)} · ${m.daysOpen}d open</div>
+            </div>
+            <div class="job-stats">
+              <div class="job-stat">
+                <div class="job-stat-val ${m.subs === 0 ? 'warn' : ''}">${m.subs}</div>
+                <div class="job-stat-lbl">CVs</div>
+              </div>
+              <div class="job-stat">
+                <div class="job-stat-val">${m.interviews}</div>
+                <div class="job-stat-lbl">Intrvw</div>
+              </div>
+              <div class="job-stat">
+                <div class="job-stat-val ${m.placs > 0 ? 'up' : ''}">${m.placs}</div>
+                <div class="job-stat-lbl">Placed</div>
+              </div>
+            </div>
+            <span class="job-badge ${badgeCls}">${esc(type)}</span>
+          </div>`;
+      }).join('');
+    }
 
-    // Flags
-    document.getElementById('flags').innerHTML = d.flags.map(f => `
-      <div class="flag f-${f.type}">
-        <span>${f.type==='red'?'⚠':f.type==='green'?'✓':'⏱'}</span>
-        <span>${esc(f.msg)}</span>
-      </div>`).join('');
-
+    ['header','stats','jobsList'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     setState(null);
-    document.getElementById('card').classList.add('visible');
   }
 
   // ── State ─────────────────────────────────────────────────────────
   function setState(id) {
     ['stateLoading','stateNoConn','stateError'].forEach(s =>
-      document.getElementById(s).classList.toggle('hidden', s !== id)
+      document.getElementById(s).classList.add('hidden')
     );
-    if (!id) document.getElementById('stateLoading').classList.add('hidden');
+    if (id) document.getElementById(id).classList.remove('hidden');
   }
 
-  // ── Boot ──────────────────────────────────────────────────────────
+  // ── Boot — identical to jobs card ─────────────────────────────────
   async function onRegistered(ok) {
-    const entityId = parseInt(getParam('EntityID'), 10);
-    const userId   = parseInt(getParam('UserID'),   10);
-    const corpId   = parseInt(getParam('CorporationID'), 10);
+    const entityId = parseInt(getParam('EntityID'),       10);
+    const userId   = parseInt(getParam('UserID'),         10);
+    const corpId   = parseInt(getParam('CorporationID'),  10);
     const plId     = parseInt(getParam('PrivateLabelID'), 10);
 
     if (!ok || !entityId || !userId || !corpId || !plId) {
@@ -357,13 +306,9 @@
     }
 
     try {
-      const [corp, openJobs, allJobs] = await Promise.all([
-        fetchCorp(entityId),
-        fetchOpenJobs(entityId),
-        fetchAllJobs(entityId),
-      ]);
-      const data = analyse(corp, openJobs, allJobs);
-      render(data);
+      // EntityID on a ClientCorporation record IS the company ID
+      const jobs = await fetchCompanyJobs(entityId);
+      render(entityId, jobs);
     } catch (err) {
       console.error('AccountCard:', err);
       setState('stateError');
@@ -373,7 +318,7 @@
 
   async function init() {
     setState('stateLoading');
-    document.getElementById('card').classList.remove('visible');
+    ['header','stats','jobsList'].forEach(id => document.getElementById(id).classList.add('hidden'));
     regAttempts = 0;
     register();
   }
