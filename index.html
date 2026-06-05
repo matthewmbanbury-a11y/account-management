@@ -22,48 +22,18 @@
   async function run() {
     const entityId = parseInt(getParam('EntityID'), 10);
     out.textContent = `EntityID: ${entityId}\n\n`;
-    const results = {};
 
-    // Test 1: Opportunity search — does it support clientCorporation.id?
     try {
       const evt = await postRobot.sendToParent('httpPOST', {
         relativeURL: 'search/Opportunity',
         data: {
           query: `clientCorporation.id:${entityId} AND isDeleted:false`,
-          fields: 'id,title,status,dateAdded,clientContact(id,firstName,lastName),owner(id,firstName,lastName),weightedRevenue,expectedFee',
+          fields: 'id,title,status,dateAdded,clientContact(id,firstName,lastName),owner(id,firstName,lastName)',
           count: 3, start: 0, sort: '-dateAdded'
         }
       }, { timeout: 20000 });
-      results.opportunities = evt.data;
-    } catch(e) { results.opp_error = e.message; }
-
-    // Test 2: Jobs with clientContact field — who gave us the job?
-    try {
-      const evt = await postRobot.sendToParent('httpPOST', {
-        relativeURL: 'search/JobOrder',
-        data: {
-          query: `clientCorporation.id:${entityId} AND isDeleted:false`,
-          fields: 'id,title,clientContact(id,firstName,lastName)',
-          count: 5, start: 0, sort: '-dateAdded'
-        }
-      }, { timeout: 20000 });
-      results.jobs_with_contact = evt.data;
-    } catch(e) { results.jobs_contact_error = e.message; }
-
-    // Test 3: Placements with fee fields for revenue
-    try {
-      const evt = await postRobot.sendToParent('httpPOST', {
-        relativeURL: 'search/Placement',
-        data: {
-          query: 'id:21779 OR id:25940 OR id:25181',
-          fields: 'id,status,dateBegin,dateEnd,employmentType,fee,flatFee,salary,clientBillRate,hoursPerDay,daysGuaranteed',
-          count: 3, start: 0
-        }
-      }, { timeout: 20000 });
-      results.placement_fees = evt.data;
-    } catch(e) { results.placement_fees_error = e.message; }
-
-    out.textContent += JSON.stringify(results, null, 2);
+      out.textContent += JSON.stringify(evt.data, null, 2);
+    } catch(e) { out.textContent += 'Error: ' + e.message; }
   }
 
   window.addEventListener('load', register);
