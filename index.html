@@ -304,79 +304,95 @@
   }
 
   // ── API calls ────────────────────────────────────────────────────
+  // search/* entities use GET with query params (not POST body)
+  function bhSearch(entity, query, fields, count, sort) {
+    const q   = encodeURIComponent(query);
+    const f   = encodeURIComponent(fields);
+    const s   = sort ? `&sort=${encodeURIComponent(sort)}` : '';
+    return bhGet(`search/${entity}?query=${q}&fields=${f}&count=${count||200}&start=0${s}&meta=off`)
+      .then(res => (res && res.data) ? res.data : (Array.isArray(res) ? res : []));
+  }
+
   async function fetchCorp(id) {
-    const fields = 'id,name,status,type,owner(id,firstName,lastName),address(city,countryName),phone,numEmployees,annualRevenue';
+    // 'type' is not a valid ClientCorporation field — use 'clientCorporationType' or omit
+    const fields = 'id,name,status,clientCorporationType,owner(id,firstName,lastName),address(city,countryName),phone,numEmployees,annualRevenue';
     const res = await bhGet(`entity/ClientCorporation/${id}?fields=${fields}&meta=off`);
     return res.data || res;
   }
 
   async function fetchJobs(corpId) {
-    // Open jobs on this company
-    const res = await bhPost('search/JobOrder', {
-      query: `clientCorporation.id:${corpId} AND isDeleted:false AND isOpen:true`,
-      fields: 'id,title,status,employmentType,numOpenings,dateAdded,owner(id,firstName,lastName),categories(name)',
-      count: 200, start: 0, sort: '-dateAdded'
-    });
-    return res.data || [];
+    return bhSearch(
+      'JobOrder',
+      `clientCorporation.id:${corpId} AND isDeleted:false AND isOpen:true`,
+      'id,title,status,employmentType,numOpenings,dateAdded,owner(id,firstName,lastName),categories(name)',
+      200, '-dateAdded'
+    );
   }
 
   async function fetchSubmissions(corpId) {
-    // Active submissions on this company's jobs
-    const res = await bhPost('search/JobSubmission', {
-      query: `jobOrder.clientCorporation.id:${corpId} AND isDeleted:false`,
-      fields: 'id,status,dateAdded,candidate(id,firstName,lastName),jobOrder(id,title)',
-      count: 200, start: 0, sort: '-dateAdded'
-    });
-    return res.data || [];
+    // JobSubmission doesn't support nested clientCorporation query — get via open job IDs instead
+    // Fetch job IDs first, then query submissions by jobOrder.id
+    // (handled in onRegistered by passing jobs list)
+    return [];  // replaced below with fetchSubmissionsForJobs
+  }
+
+  async function fetchSubmissionsForJobs(jobIds) {
+    if (!jobIds.length) return [];
+    // Lucene OR query for job IDs — batch to avoid URL length issues
+    const batch = jobIds.slice(0, 50);
+    const idQuery = batch.map(id => `jobOrder.id:${id}`).join(' OR ');
+    return bhSearch(
+      'JobSubmission',
+      `(${idQuery}) AND isDeleted:false`,
+      'id,status,dateAdded,candidate(id,firstName,lastName),jobOrder(id,title)',
+      200, '-dateAdded'
+    );
   }
 
   async function fetchPlacements(corpId) {
-    // All placements this year for this company
     const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
-    const res = await bhPost('search/Placement', {
-      query: `clientCorporation.id:${corpId} AND isDeleted:false AND dateAdded:[${yearStart} TO *]`,
-      fields: 'id,status,dateAdded,startDate,endDate,employmentType,fee,flatFee,salary,clientBillRate,hoursPerWeek,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName),customText1',
-      count: 200, start: 0, sort: '-dateAdded'
-    });
-    return res.data || [];
+    return bhSearch(
+      'Placement',
+      `clientCorporation.id:${corpId} AND isDeleted:false AND dateAdded:[${yearStart} TO *]`,
+      'id,status,dateAdded,startDate,endDate,employmentType,fee,flatFee,salary,clientBillRate,hoursPerWeek,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName),customText1',
+      200, '-dateAdded'
+    );
   }
 
   async function fetchAllPlacements(corpId) {
-    // All-time placements for fill rate
-    const res = await bhPost('search/Placement', {
-      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
-      fields: 'id,status',
-      count: 500, start: 0
-    });
-    return res.data || [];
+    return bhSearch(
+      'Placement',
+      `clientCorporation.id:${corpId} AND isDeleted:false`,
+      'id,status',
+      500
+    );
   }
 
   async function fetchNotes(corpId) {
-    const res = await bhPost('search/Note', {
-      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
-      fields: 'id,dateAdded,action,commentingPerson(id,firstName,lastName)',
-      count: 100, start: 0, sort: '-dateAdded'
-    });
-    return res.data || [];
+    return bhSearch(
+      'Note',
+      `clientCorporation.id:${corpId} AND isDeleted:false`,
+      'id,dateAdded,action,commentingPerson(id,firstName,lastName)',
+      100, '-dateAdded'
+    );
   }
 
   async function fetchContacts(corpId) {
-    const res = await bhPost('search/ClientContact', {
-      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
-      fields: 'id,firstName,lastName,title,email,status',
-      count: 200, start: 0
-    });
-    return res.data || [];
+    return bhSearch(
+      'ClientContact',
+      `clientCorporation.id:${corpId} AND isDeleted:false AND status:Active`,
+      'id,firstName,lastName,title,email',
+      200
+    );
   }
 
   async function fetchAllJobs(corpId) {
-    // All-time jobs for fill rate calculation
-    const res = await bhPost('search/JobOrder', {
-      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
-      fields: 'id,status',
-      count: 500, start: 0
-    });
-    return res.data || [];
+    return bhSearch(
+      'JobOrder',
+      `clientCorporation.id:${corpId} AND isDeleted:false`,
+      'id,status',
+      500
+    );
   }
 
   // ── Analysis ─────────────────────────────────────────────────────
@@ -493,7 +509,7 @@
     return {
       corpName: corp.name,
       owner: corp.owner ? `${corp.owner.firstName} ${corp.owner.lastName}` : '—',
-      type: corp.type || '—',
+      type: corp.clientCorporationType || '—',
       lastActivity,
       permFees, contractGP, totalGP,
       placCount: placements.length,
@@ -573,7 +589,7 @@
     // Flags
     document.getElementById('flags').innerHTML = d.flags.map(f => `
       <div class="flag flag-${f.type}">
-        <span class="flag-icon">${f.type==='red'?'⚠':'f.type'==='green'?'✓':'⏱'}</span>
+        <span class="flag-icon">${f.type==='red'?'⚠':f.type==='green'?'✓':'⏱'}</span>
         <span>${esc(f.msg)}</span>
       </div>`).join('');
 
@@ -611,17 +627,20 @@
     }
 
     try {
-      // Fetch all data in parallel
-      const [corp, jobs, submissions, placements, allPlacements, notes, contacts, allJobs] = await Promise.all([
+      // First wave — corp + jobs needed before submissions
+      const [corp, jobs, placements, allPlacements, notes, contacts, allJobs] = await Promise.all([
         fetchCorp(entityId),
         fetchJobs(entityId),
-        fetchSubmissions(entityId),
         fetchPlacements(entityId),
         fetchAllPlacements(entityId),
         fetchNotes(entityId),
         fetchContacts(entityId),
         fetchAllJobs(entityId),
       ]);
+
+      // Submissions need job IDs (can't query by nested clientCorporation.id on JobSubmission)
+      const jobIds = jobs.map(j => j.id);
+      const submissions = await fetchSubmissionsForJobs(jobIds);
 
       const data = analyse(corp, jobs, submissions, placements, allPlacements, notes, contacts, allJobs);
       render(data);
