@@ -289,12 +289,12 @@
     const jDP=jobsPY>0?Math.round((jobsCY-jobsPY)/jobsPY*100):null;
     const maxLead=leaderboard.length?leaderboard[0].placs:1;
 
-    // Trend bar helper — renders a set of year bars
+    // Trend bar helper — valFn returns {num, label} or null
     function trendBars(data,color,valFn){
-      const vals=data.map(([yr,d])=>valFn(d)).filter(v=>v!==null&&v>0);
-      if(!vals.length)return '<div class="empty">No data</div>';
-      const mx=Math.max(...vals);
-      return data.map(([yr,d])=>{const v=valFn(d);if(v===null||v===0)return'';return`<div class="bar-row"><div class="bar-label">${yr}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/mx*100)}%;background:${color}"></div></div><div class="bar-val" style="color:${color}">${v}</div></div>`;}).join('');
+      const entries=data.map(([yr,d])=>({yr,v:valFn(d)})).filter(e=>e.v!==null&&e.v.num>0);
+      if(!entries.length)return '<div class="empty">No data</div>';
+      const mx=Math.max(...entries.map(e=>e.v.num));
+      return entries.map(e=>`<div class="bar-row"><div class="bar-label">${e.yr}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(e.v.num/mx*100)}%;background:${color}"></div></div><div class="bar-val" style="color:${color}">${e.v.label}</div></div>`).join('');
     }
 
     const html=`
@@ -365,15 +365,15 @@
           </div>
           <div class="card">
             <div class="card-head"><span class="card-title">Bill Rate Trend</span><span class="card-count">avg £/day by year</span></div>
-            ${trendBars(trendYears,'var(--purple)',d=>{const a=avgArr(d.billRates);return a?`£${a}/day`:null;})}
+            ${trendBars(trendYears,'var(--purple)',d=>{const a=avgArr(d.billRates);return a?{num:a,label:'£'+a+'/day'}:null;})}
           </div>
           <div class="card">
             <div class="card-head"><span class="card-title">Margin Trend</span><span class="card-count">avg £/day margin by year</span></div>
-            ${trendBars(trendYears,'var(--green)',d=>{const a=avgArr(d.margins);return a?`£${Math.round(a)}/day`:null;})}
+            ${trendBars(trendYears,'var(--green)',d=>{const a=avgArr(d.margins);return a?{num:Math.round(a),label:'£'+Math.round(a)+'/day'}:null;})}
           </div>
           <div class="card">
             <div class="card-head"><span class="card-title">Jobs Added Trend</span><span class="card-count">vacancies raised per year</span></div>
-            ${trendBars(trendYears,'var(--blue)',d=>d.jobs>0?`${d.jobs} jobs`:null)}
+            ${trendBars(trendYears,'var(--blue)',d=>d.jobs>0?{num:d.jobs,label:d.jobs+' jobs'}:null)}
           </div>
           <div class="card">
             <div class="card-head"><span class="card-title">Fill Rate Trend</span><span class="card-count">placements per year</span></div>
@@ -381,7 +381,7 @@
           </div>
           <div class="card">
             <div class="card-head"><span class="card-title">Time to Fill Trend</span><span class="card-count">avg days job → placement</span></div>
-            ${trendBars(trendYears,'var(--yellow)',d=>{const a=avgArr(d.ttfDays);return a?`${a}d avg`:null;})}
+            ${trendBars(trendYears,'var(--yellow)',d=>{const a=avgArr(d.ttfDays);return a?{num:a,label:a+'d avg'}:null;})}
           </div>
         </div>
 
@@ -453,28 +453,36 @@
   }
 
   async function generateBriefing(d){
+    const el=document.getElementById('ai-text');
     try{
-      const prompt=`You are an expert recruitment account manager assistant at La Fosse Associates. Based on this account data, write a concise 3-4 sentence briefing that tells the account manager exactly what they need to know and do today. Be specific — use the actual numbers and names. Focus on the most important actions. Write in flowing prose, no bullet points.
+      const prompt='You are an expert recruitment account manager assistant at La Fosse Associates. Based on this account data, write a concise 3-4 sentence briefing telling the account manager exactly what to do today. Be specific with numbers and names. Flowing prose, no bullet points.\n\nAccount data:\n- Health: '+d.healthScore+'/100 ('+d.healthLabel+')\n- Open jobs: '+d.openJobs+' ('+d.atRiskJobs+' at risk)'+(d.jobDetails.filter(j=>j.rag==='red').length?' — '+d.jobDetails.filter(j=>j.rag==='red').map(j=>j.title+' ('+j.daysOpen+'d, '+j.cvs+' CVs)').join(', '):'')+'\n- Contractors on-site: '+d.activeContractors+(d.endingSoon>0?' — '+d.endingSoon+' ending <30d: '+d.endingSoonNames.join(', '):'')+'\n- Revenue L12M: £'+d.revL12M.toLocaleString()+' | CY: £'+d.revCY.toLocaleString()+' vs PY: £'+d.revPY.toLocaleString()+(d.revDeltaPct!==null?' ('+d.revDeltaPct+'% YoY)':'')+'\n- Placements: '+d.totalPlacements+' | Fill rate: '+d.fillRate+'% | Avg TTF: '+(d.avgTTF||'unknown')+'d\n- Open opps: '+d.openOpps+'\n- Contacts: '+d.contacts+' total | '+d.contactsNeverContacted+' never contacted | '+d.contactsGoneCold+' cold'+(d.keyPersonRisk.length?'\n- KEY PERSON RISK: '+d.keyPersonRisk.join('; '):'')+'\n- Top consultant: '+(d.topConsultant||'unknown')+'\n- Last activity: '+(d.daysSinceLastActivity!==null?d.daysSinceLastActivity+'d ago ('+d.lastNoteAction+')':'unknown')+(d.whitespaceGaps.length?'\n- Whitespace gaps: '+d.whitespaceGaps.join(', '):'');
 
-Account data:
-- Health score: ${d.healthScore}/100 (${d.healthLabel})
-- Open jobs: ${d.openJobs} (${d.atRiskJobs} at risk)${d.jobDetails.filter(j=>j.rag==='red').length?' — at risk: '+d.jobDetails.filter(j=>j.rag==='red').map(j=>j.title+' ('+j.daysOpen+'d open, '+j.cvs+' CVs)').join(', '):''}
-- Active contractors on-site: ${d.activeContractors}${d.endingSoon>0?' — '+d.endingSoon+' ending <30 days: '+d.endingSoonNames.join(', '):''}
-- Revenue L12M: £${d.revL12M.toLocaleString()} | CY: £${d.revCY.toLocaleString()} vs PY: £${d.revPY.toLocaleString()}${d.revDeltaPct!==null?' ('+d.revDeltaPct+'% YoY)':''}
-- Total placements: ${d.totalPlacements} | Fill rate: ${d.fillRate}% | Avg TTF: ${d.avgTTF||'unknown'} days
-- Open opportunities: ${d.openOpps}
-- Contacts: ${d.contacts} total | ${d.contactsNeverContacted} never contacted | ${d.contactsGoneCold} gone cold (60+ days)
-${d.keyPersonRisk.length?'- KEY PERSON RISK: '+d.keyPersonRisk.join('; '):''}
-- Top consultant: ${d.topConsultant||'unknown'}
-- Last activity: ${d.daysSinceLastActivity!==null?d.daysSinceLastActivity+'d ago ('+d.lastNoteAction+')':'unknown'}
-${d.whitespaceGaps.length?'- Whitespace gaps (never placed): '+d.whitespaceGaps.join(', '):''}`;
-
-      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})
+      });
+      if(!resp.ok)throw new Error('API '+resp.status);
       const result=await resp.json();
       const text=result.content?.[0]?.text||'Could not generate briefing.';
-      const el=document.getElementById('ai-text');
       if(el){el.style.fontStyle='normal';el.style.color='var(--text)';el.textContent=text;}
-    }catch(err){const el=document.getElementById('ai-text');if(el)el.textContent='Briefing unavailable.';console.error('Briefing error:',err);}
+    }catch(err){
+      // Fallback: generate a rule-based briefing from the data
+      if(el){
+        el.style.fontStyle='normal';
+        el.style.color='var(--text)';
+        const parts=[];
+        if(d.atRiskJobs>0)parts.push(`${d.atRiskJobs} job${d.atRiskJobs>1?'s are':' is'} at risk — ${d.jobDetails.filter(j=>j.rag==='red').slice(0,2).map(j=>j.title+' ('+j.daysOpen+'d open)').join(' and ')} need immediate attention.`);
+        if(d.endingSoon>0)parts.push(`${d.endingSoon} contractor${d.endingSoon>1?'s':''} ending within 30 days — ${d.endingSoonNames.slice(0,2).join(' and ')} — start extension conversations now.`);
+        if(d.keyPersonRisk.length>0)parts.push(`Key person risk: ${d.keyPersonRisk.slice(0,2).join(' and ')} — high-value contacts with no recent activity.`);
+        if(d.revDeltaPct!==null&&d.revDeltaPct<-10)parts.push(`Revenue is down ${Math.abs(d.revDeltaPct)}% YTD vs prior year — focus on pipeline acceleration.`);
+        else if(d.revDeltaPct!==null&&d.revDeltaPct>10)parts.push(`Revenue up ${d.revDeltaPct}% YTD — strong account momentum to maintain.`);
+        if(d.daysSinceLastActivity>14)parts.push(`No activity logged in ${d.daysSinceLastActivity} days — schedule an account touchpoint.`);
+        if(d.contactsNeverContacted>10)parts.push(`${d.contactsNeverContacted} contacts have never been contacted — significant untapped relationship potential.`);
+        el.textContent=parts.length?parts.join(' '):'Account is active with '+d.openJobs+' open jobs and '+d.activeContractors+' contractors on-site. Fill rate is '+d.fillRate+'% all time.';
+      }
+      console.warn('Claude API unavailable (likely CORS in iframe), using rule-based briefing.',err.message);
+    }
   }
 
   function show(html){document.getElementById('root').innerHTML=html;}
