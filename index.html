@@ -1,710 +1,645 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Account Management Card</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/post-robot/10.0.46/post-robot.min.js"></script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Management</title>
+  <script src="//cdn.rawgit.com/krakenjs/post-robot/7da06445/dist/post-robot.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --font: 'Source Sans 3', 'Source Sans Pro', sans-serif;
+      --blue: #0d6dcd;
+      --blue-light: #e8f1fb;
+      --green: #1a7f4b;
+      --green-light: #e6f4ed;
+      --amber: #a35c00;
+      --amber-light: #fef3e2;
+      --red: #b91c1c;
+      --red-light: #fef2f2;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --radius: 6px;
+    }
+    html, body { font-family: var(--font); font-size: 13px; color: var(--text); background: var(--bg); line-height: 1.5; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
 
-  :root {
-    --font: 'Source Sans 3', 'Source Sans Pro', sans-serif;
-    --blue: #0d6dcd;
-    --blue-light: #e8f1fb;
-    --green: #1a7f4b;
-    --green-light: #e6f4ed;
-    --amber: #a35c00;
-    --amber-light: #fef3e2;
-    --red: #b91c1c;
-    --red-light: #fef2f2;
-    --gray: #64748b;
-    --gray-light: #f1f5f9;
-    --border: #e2e8f0;
-    --text: #1e293b;
-    --text-muted: #64748b;
-    --bg: #ffffff;
-    --surface: #f8fafc;
-    --radius: 6px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-  }
+    /* ── State screens ── */
+    .state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; min-height: 160px; }
+    .state-msg { font-size: 12px; color: var(--muted); text-align: center; max-width: 260px; line-height: 1.6; }
+    .state-title { font-size: 13px; font-weight: 600; }
+    .spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .retry-btn { margin-top: 4px; padding: 5px 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: inherit; font-size: 11px; border-radius: var(--radius); cursor: pointer; }
+    .retry-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .hidden { display: none !important; }
 
-  body {
-    font-family: var(--font);
-    font-size: 13px;
-    color: var(--text);
-    background: var(--bg);
-    line-height: 1.5;
-    padding: 0 0 24px 0;
-  }
+    /* ── Layout ── */
+    #card { display: none; flex-direction: column; }
+    #card.visible { display: flex; }
 
-  /* ── Header ── */
-  .acct-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 14px 16px 10px;
-    border-bottom: 1px solid var(--border);
-    gap: 12px;
-  }
-  .acct-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .acct-meta {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 2px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
-  }
-  .acct-meta .sep { color: var(--border); }
-  .last-contact {
-    text-align: right;
-    flex-shrink: 0;
-  }
-  .last-contact .lc-label { font-size: 11px; color: var(--text-muted); }
-  .last-contact .lc-value { font-size: 13px; font-weight: 500; margin-top: 1px; }
+    /* ── Header ── */
+    .acct-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px 14px 10px; border-bottom: 1px solid var(--border); gap: 10px; }
+    .acct-name { font-size: 14px; font-weight: 600; }
+    .acct-meta { font-size: 12px; color: var(--muted); margin-top: 2px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+    .last-contact { text-align: right; flex-shrink: 0; }
+    .lc-label { font-size: 11px; color: var(--muted); }
+    .lc-value { font-size: 13px; font-weight: 500; margin-top: 1px; }
 
-  /* ── Pill / Badge ── */
-  .pill {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 500;
-    padding: 1px 7px;
-    border-radius: 20px;
-    line-height: 1.6;
-  }
-  .pill-blue   { background: var(--blue-light);  color: var(--blue);  }
-  .pill-green  { background: var(--green-light); color: var(--green); }
-  .pill-amber  { background: var(--amber-light); color: var(--amber); }
-  .pill-red    { background: var(--red-light);   color: var(--red);   }
-  .pill-gray   { background: var(--gray-light);  color: var(--gray);  }
+    /* ── Pills ── */
+    .pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 20px; line-height: 1.6; }
+    .pill-blue   { background: var(--blue-light);  color: var(--blue);  }
+    .pill-green  { background: var(--green-light); color: var(--green); }
+    .pill-amber  { background: var(--amber-light); color: var(--amber); }
+    .pill-red    { background: var(--red-light);   color: var(--red);   }
+    .pill-gray   { background: var(--surface);     color: var(--muted); border: 1px solid var(--border); }
 
-  /* ── Sections ── */
-  .section { padding: 12px 16px 0; }
-  .section + .section { border-top: 1px solid var(--border); margin-top: 12px; }
+    /* ── Sections ── */
+    .section { padding: 12px 14px 0; }
+    .section + .section { border-top: 1px solid var(--border); margin-top: 10px; }
+    .section:last-child { padding-bottom: 16px; }
+    .section-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 9px; display: flex; justify-content: space-between; align-items: center; }
+    .section-title span { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; }
 
-  .section-title {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .section-title span { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; }
+    /* ── Metric grid ── */
+    .metric-grid { display: grid; gap: 8px; margin-bottom: 4px; }
+    .metric-grid.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .metric-grid.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
+    .metric-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .metric-value { font-size: 19px; font-weight: 600; line-height: 1.1; }
+    .metric-value.amber { color: var(--amber); }
+    .metric-value.red   { color: var(--red);   }
+    .metric-value.green { color: var(--green); }
+    .metric-sub { font-size: 11px; margin-top: 2px; color: var(--muted); }
+    .metric-sub.up   { color: var(--green); }
+    .metric-sub.down { color: var(--red);   }
+    .metric-sub.warn { color: var(--amber); }
 
-  /* ── Metric grid ── */
-  .metric-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 4px;
-  }
-  .metric-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    /* ── Bar chart ── */
+    .bar-section { margin-top: 10px; }
+    .bar-label { font-size: 11px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+    .bar-name { font-size: 12px; color: var(--muted); width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { flex: 1; background: var(--border); border-radius: 3px; height: 7px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; background: var(--blue); }
+    .bar-val { font-size: 12px; font-weight: 500; width: 44px; text-align: right; flex-shrink: 0; color: var(--blue); }
 
-  .metric-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 9px 11px;
-  }
-  .metric-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .metric-value {
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1.1;
-    color: var(--text);
-  }
-  .metric-value.amber { color: var(--amber); }
-  .metric-value.red   { color: var(--red);   }
-  .metric-sub {
-    font-size: 11px;
-    margin-top: 2px;
-    color: var(--text-muted);
-  }
-  .metric-sub.up   { color: var(--green); }
-  .metric-sub.down { color: var(--red);   }
-  .metric-sub.warn { color: var(--amber); }
+    /* ── Two-col ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0; }
+    .panel { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-head { padding: 6px 10px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .data-table th { font-size: 10px; font-weight: 600; color: var(--muted); text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+    .data-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td.muted { color: var(--muted); }
+    .empty-row { text-align: center; color: var(--muted); padding: 12px 8px !important; }
 
-  /* ── Bar chart ── */
-  .bar-section { margin-top: 10px; }
-  .bar-label { font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
-  .bar-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 5px;
-  }
-  .bar-name {
-    font-size: 12px;
-    color: var(--text-muted);
-    width: 120px;
-    flex-shrink: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .bar-track {
-    flex: 1;
-    background: var(--border);
-    border-radius: 3px;
-    height: 7px;
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: var(--blue);
-  }
-  .bar-val {
-    font-size: 12px;
-    font-weight: 500;
-    width: 48px;
-    text-align: right;
-    flex-shrink: 0;
-    color: var(--blue);
-  }
+    /* ── Flags ── */
+    .flags { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+    .flag { display: flex; align-items: flex-start; gap: 8px; padding: 6px 9px; border-radius: var(--radius); font-size: 12px; line-height: 1.4; }
+    .flag-icon { flex-shrink: 0; margin-top: 1px; }
+    .flag-red   { background: var(--red-light);   color: #7f1d1d; border-left: 3px solid var(--red);   }
+    .flag-amber { background: var(--amber-light);  color: #78350f; border-left: 3px solid var(--amber); }
+    .flag-green { background: var(--green-light); color: #14532d; border-left: 3px solid var(--green); }
+    .flag-blue  { background: var(--blue-light);   color: #1e40af; border-left: 3px solid var(--blue);  }
 
-  /* ── Tables ── */
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-  .data-table th {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-align: left;
-    padding: 4px 6px;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  .data-table td {
-    padding: 6px 6px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    vertical-align: middle;
-  }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table td.muted { color: var(--text-muted); }
-
-  /* ── Two-col layout ── */
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .two-col-panel {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .two-col-panel .panel-head {
-    padding: 7px 10px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .two-col-panel .data-table { font-size: 12px; }
-  .two-col-panel .data-table td,
-  .two-col-panel .data-table th { padding: 5px 8px; }
-
-  /* ── Flags ── */
-  .flags { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-  .flag {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 7px 10px;
-    border-radius: var(--radius);
-    font-size: 12px;
-    line-height: 1.4;
-  }
-  .flag-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
-  .flag-red    { background: var(--red-light);   color: #7f1d1d; border-left: 3px solid var(--red);   }
-  .flag-amber  { background: var(--amber-light);  color: #78350f; border-left: 3px solid var(--amber); }
-  .flag-blue   { background: var(--blue-light);   color: #1e40af; border-left: 3px solid var(--blue);  }
-
-  /* ── Chart ── */
-  .chart-wrap {
-    position: relative;
-    height: 160px;
-    margin-top: 8px;
-  }
-
-  /* ── Divider ── */
-  .divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
-
-  /* ── Loading / error states ── */
-  .state-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;
-    font-size: 13px;
-    color: var(--text-muted);
-    flex-direction: column;
-    gap: 8px;
-  }
-  .spinner {
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--border);
-    border-top-color: var(--blue);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .state-box.error { color: var(--red); }
-  .demo-banner {
-    background: var(--amber-light);
-    border-bottom: 1px solid #fed7aa;
-    padding: 5px 16px;
-    font-size: 11px;
-    color: var(--amber);
-    font-weight: 500;
-  }
-</style>
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+  </style>
 </head>
 <body>
 
-<div id="root"><div class="state-box"><div class="spinner"></div><span>Loading account data…</span></div></div>
+  <div class="state" id="stateLoading">
+    <div class="spinner"></div>
+    <div class="state-msg">Loading account data…</div>
+  </div>
 
-<script>
-/* ─────────────────────────────────────────────
-   CONFIG — update these to match your instance
-───────────────────────────────────────────── */
-const CONFIG = {
-  restUrl:  'https://rest21.bullhornstaffing.com/rest-services/7pklds',
-  swimlane: 'rest21',
-  corpId:   '21592',
-  // Fields to fetch on ClientCorporation
-  corpFields: 'id,name,owner,clientCorporationId,address,phone,fax,website,status,type,annualRevenue,numEmployees',
-  // Fields to fetch on Placement (active contracts)
-  placementFields: 'id,candidate,jobOrder,startDate,endDate,status,employmentType,salary,clientBillRate,customText1',
-  // Fields to fetch on JobOrder
-  jobFields: 'id,title,status,employmentType,numOpenings,submissions,isOpen,dateAdded,owner,categories',
-  // Max records per entity query
-  maxResults: 200,
-};
+  <div class="state hidden" id="stateNoConn">
+    <div class="state-title">Not connected</div>
+    <div class="state-msg">Open this card from a Client Corporation record in Bullhorn.</div>
+  </div>
 
-/* ─────────────────────────────────────────────
-   MOCK DATA (shown when AppBridge unavailable)
-───────────────────────────────────────────── */
-const MOCK = {
-  demo: true,
-  corp: { id: 999, name: 'Barclays UK', owner: { firstName: 'Sarah', lastName: 'Holt' }, type: 'Client', status: 'Active' },
-  revenue: { permFees: 214000, contractGP: 98000, totalGP: 312000, target: 380000, lyGP: 273000, lyPerm: 181000, lyCont: 92000 },
-  pipeline: {
-    openJobs: 11, openPerm: 4, openContract: 7,
-    submissions: 34, interviews: 8, offersOut: 3, staleOffers: 3,
-    byPractice: [
-      { name: 'Technology',        value: 148000 },
-      { name: 'Risk & Compliance', value: 78000  },
-      { name: 'Finance',           value: 43000  },
-      { name: 'Operations',        value: 21000  },
-    ]
-  },
-  contractors: [
-    { name: 'J. Patel',   role: 'DevSecOps',   end: '31 Jul 25', status: 'Extending'  },
-    { name: 'L. Okafor',  role: 'BA',           end: '14 Jun 25', status: 'Finishing'  },
-    { name: 'M. Chen',    role: 'PM',           end: '30 Sep 25', status: 'May Extend' },
-    { name: 'A. Singh',   role: 'Data Eng.',    end: '31 Aug 25', status: 'Unknown'    },
-    { name: 'P. Nwosu',   role: 'QA Engineer',  end: '15 Oct 25', status: 'Extending'  },
-  ],
-  permPlacements: [
-    { consultant: 'S. Holt',  count: 6, avgFee: 28000 },
-    { consultant: 'D. Mbeki', count: 4, avgFee: 24000  },
-    { consultant: 'R. Torres',count: 3, avgFee: 31000  },
-    { consultant: 'Others',   count: 3, avgFee: 19000  },
-  ],
-  relationship: { callsThisMonth: 7, nps: 8.4, contacts: 5, lastContact: '3 days ago', tier: 'Strategic' },
-  submissionsTrend: [2,5,9,14,18,22,26,29,32,34],
-};
+  <div class="state hidden" id="stateError">
+    <div class="state-title">Could not load data</div>
+    <div class="state-msg" id="errMsg"></div>
+    <button class="retry-btn" onclick="init()">Retry</button>
+  </div>
 
-/* ─────────────────────────────────────────────
-   HELPERS
-───────────────────────────────────────────── */
-function fmt(n)   { return '£' + (n >= 1000 ? (n/1000).toFixed(0) + 'k' : n.toLocaleString()); }
-function pct(a,b) { if (!b) return '—'; return ((a-b)/b*100).toFixed(0) + '%'; }
-function sign(n)  { return n >= 0 ? '↑ ' : '↓ '; }
-function contractorStatusPill(s) {
-  const map = {
-    'Finishing':   'pill-red',
-    'Extending':   'pill-amber',
-    'May Extend':  'pill-green',
-    'Not Extending':'pill-red',
-    'Finished':    'pill-gray',
-    'Unknown':     'pill-gray',
-  };
-  return `<span class="pill ${map[s] || 'pill-gray'}">${s}</span>`;
-}
-function tierPill(t) {
-  const map = { 'Strategic': 'pill-blue', 'Key': 'pill-green', 'Growth': 'pill-amber', 'Standard': 'pill-gray' };
-  return `<span class="pill ${map[t] || 'pill-gray'}">${t}</span>`;
-}
-
-/* ─────────────────────────────────────────────
-   API FETCH
-───────────────────────────────────────────── */
-async function apiFetch(token, path) {
-  const url = `${CONFIG.restUrl}/${path}${path.includes('?') ? '&' : '?'}BhRestToken=${token}&count=${CONFIG.maxResults}`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`API error ${r.status}: ${path}`);
-  return r.json();
-}
-
-async function loadData(token, entityId) {
-  // Parallel fetch: company, placements, jobs, notes, contacts
-  const [corpRes, placRes, jobRes, noteRes, contactRes] = await Promise.allSettled([
-    apiFetch(token, `entity/ClientCorporation/${entityId}?fields=${CONFIG.corpFields}`),
-    apiFetch(token, `search/Placement?query=clientCorporation.id:${entityId} AND status:"Active"&fields=${CONFIG.placementFields}`),
-    apiFetch(token, `search/JobOrder?query=clientCorporation.id:${entityId} AND isOpen:true&fields=${CONFIG.jobFields}`),
-    apiFetch(token, `search/Note?query=clientCorporation.id:${entityId}&fields=id,dateAdded,action,commentingPerson&sort=-dateAdded&count=50`),
-    apiFetch(token, `search/ClientContact?query=clientCorporation.id:${entityId}&fields=id,firstName,lastName,title,email&count=100`),
-  ]);
-
-  const corp      = corpRes.status === 'fulfilled'    ? corpRes.value.data    : null;
-  const placements= placRes.status === 'fulfilled'    ? placRes.value.data    : [];
-  const jobs      = jobRes.status === 'fulfilled'     ? jobRes.value.data     : [];
-  const notes     = noteRes.status === 'fulfilled'    ? noteRes.value.data    : [];
-  const contacts  = contactRes.status === 'fulfilled' ? contactRes.value.data : [];
-
-  if (!corp) throw new Error('Could not load company record');
-
-  // Revenue: sum fee fields on completed placements (extend as needed for your field names)
-  const completedPlacements = placements.filter(p => p.status === 'Placed' || p.employmentType === 'Permanent');
-  const permFees   = completedPlacements.filter(p => p.employmentType === 'Permanent').reduce((s,p) => s + (p.salary || 0), 0);
-  const contractGP = placements.filter(p => p.employmentType !== 'Permanent').reduce((s,p) => s + (p.clientBillRate || 0), 0);
-  const totalGP    = permFees + contractGP;
-
-  // Active contractors with end dates
-  const contractors = placements
-    .filter(p => p.employmentType !== 'Permanent')
-    .map(p => ({
-      name:   p.candidate ? `${p.candidate.firstName || ''} ${p.candidate.lastName || ''}`.trim() : '—',
-      role:   p.jobOrder  ? p.jobOrder.title : '—',
-      end:    p.endDate   ? new Date(p.endDate).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'2-digit'}) : '—',
-      status: p.customText1 || 'Unknown',
-    }));
-
-  // Pipeline counts
-  const openPerm     = jobs.filter(j => j.employmentType === 'Permanent').length;
-  const openContract = jobs.filter(j => j.employmentType !== 'Permanent').length;
-  const submissions  = jobs.reduce((s,j) => s + (j.submissions || 0), 0);
-
-  // Notes: calls this month
-  const thisMonth = new Date(); thisMonth.setDate(1); thisMonth.setHours(0,0,0,0);
-  const callsThisMonth = notes.filter(n => new Date(n.dateAdded) >= thisMonth && (n.action||'').toLowerCase().includes('call')).length;
-  const lastContactMs  = notes.length ? Math.max(...notes.map(n => n.dateAdded)) : null;
-  const daysSince      = lastContactMs ? Math.round((Date.now() - lastContactMs) / 86400000) : null;
-
-  return {
-    demo: false,
-    corp,
-    revenue: { permFees, contractGP, totalGP, target: 0, lyGP: 0, lyPerm: 0, lyCont: 0 },
-    pipeline: { openJobs: jobs.length, openPerm, openContract, submissions, interviews: 0, offersOut: 0, staleOffers: 0, byPractice: [] },
-    contractors,
-    permPlacements: [],
-    relationship: {
-      callsThisMonth,
-      nps: null,
-      contacts: contacts.length,
-      lastContact: daysSince !== null ? `${daysSince} day${daysSince === 1 ? '' : 's'} ago` : '—',
-      tier: 'Standard',
-    },
-    submissionsTrend: [],
-  };
-}
-
-/* ─────────────────────────────────────────────
-   FLAGS (rule-based)
-───────────────────────────────────────────── */
-function buildFlags(d) {
-  const flags = [];
-  const now = new Date();
-  // Contractors finishing soon with no replacement
-  d.contractors.forEach(c => {
-    if (c.status === 'Finishing') {
-      flags.push({ type: 'red', msg: `${c.name} contract ending ${c.end} — no extension or replacement job raised` });
-    }
-  });
-  // Stale offers
-  if (d.pipeline.staleOffers > 0) {
-    flags.push({ type: 'amber', msg: `${d.pipeline.staleOffers} offer${d.pipeline.staleOffers > 1 ? 's' : ''} pending >5 days — decision chasing recommended` });
-  }
-  // Target gap
-  if (d.revenue.target > 0) {
-    const gap = d.revenue.target - d.revenue.totalGP;
-    const vsTarget = Math.round(d.revenue.totalGP / d.revenue.target * 100);
-    if (vsTarget < 90) {
-      flags.push({ type: 'amber', msg: `${vsTarget}% of annual target — ${fmt(gap)} needed to close gap` });
-    }
-  }
-  // No recent contact
-  if (d.relationship.callsThisMonth === 0) {
-    flags.push({ type: 'blue', msg: 'No calls logged this month — consider scheduling an account touchpoint' });
-  }
-  return flags;
-}
-
-/* ─────────────────────────────────────────────
-   RENDER
-───────────────────────────────────────────── */
-function render(d) {
-  const flags = buildFlags(d);
-  const owner  = d.corp.owner ? `${d.corp.owner.firstName} ${d.corp.owner.lastName}` : '—';
-  const byPractice = d.pipeline.byPractice;
-  const maxPractice = byPractice.length ? Math.max(...byPractice.map(p => p.value)) : 1;
-
-  const vsTarget  = d.revenue.target > 0 ? Math.round(d.revenue.totalGP / d.revenue.target * 100) : null;
-  const gpDiff    = d.revenue.totalGP - d.revenue.lyGP;
-  const permDiff  = d.revenue.permFees - d.revenue.lyPerm;
-  const contDiff  = d.revenue.contractGP - d.revenue.lyCont;
-
-  const html = `
-    ${d.demo ? '<div class="demo-banner">⚡ Demo mode — sample data shown. Connect via AppBridge for live data.</div>' : ''}
-
+  <div id="card">
+    <!-- Header -->
     <div class="acct-header">
       <div>
-        <div class="acct-name">${d.corp.name}</div>
-        <div class="acct-meta">
-          <span>Owner: <strong>${owner}</strong></span>
-          <span class="sep">·</span>
-          <span>${d.corp.type || 'Client'}</span>
-          <span class="sep">·</span>
-          <span>Tier: ${tierPill(d.relationship.tier)}</span>
-        </div>
+        <div class="acct-name" id="corpName">—</div>
+        <div class="acct-meta" id="corpMeta"></div>
       </div>
       <div class="last-contact">
-        <div class="lc-label">Last contact</div>
-        <div class="lc-value">${d.relationship.lastContact}</div>
+        <div class="lc-label">Last activity</div>
+        <div class="lc-value" id="lastContact">—</div>
       </div>
     </div>
 
-    <!-- REVENUE -->
-    <div class="section">
-      <div class="section-title">Revenue snapshot <span>YTD · FY ${new Date().getFullYear()}</span></div>
-      <div class="metric-grid">
+    <!-- Revenue -->
+    <div class="section" id="secRevenue">
+      <div class="section-title">Revenue snapshot <span id="revYear"></span></div>
+      <div class="metric-grid cols-4">
         <div class="metric-card">
           <div class="metric-label">Perm fees</div>
-          <div class="metric-value">${fmt(d.revenue.permFees)}</div>
-          ${d.revenue.lyPerm ? `<div class="metric-sub ${permDiff >= 0 ? 'up' : 'down'}">${sign(permDiff)}${Math.abs(+pct(d.revenue.permFees,d.revenue.lyPerm))}% vs LY</div>` : '<div class="metric-sub">—</div>'}
+          <div class="metric-value" id="mPermFees">—</div>
+          <div class="metric-sub" id="mPermSub"></div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Contract GP</div>
-          <div class="metric-value">${fmt(d.revenue.contractGP)}</div>
-          ${d.revenue.lyCont ? `<div class="metric-sub ${contDiff >= 0 ? 'up' : 'down'}">${sign(contDiff)}${Math.abs(+pct(d.revenue.contractGP,d.revenue.lyCont))}% vs LY</div>` : '<div class="metric-sub">—</div>'}
+          <div class="metric-value" id="mContractGP">—</div>
+          <div class="metric-sub" id="mContractSub"></div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Total GP</div>
-          <div class="metric-value">${fmt(d.revenue.totalGP)}</div>
-          ${d.revenue.lyGP ? `<div class="metric-sub ${gpDiff >= 0 ? 'up' : 'down'}">${sign(gpDiff)}${Math.abs(+pct(d.revenue.totalGP,d.revenue.lyGP))}% vs LY</div>` : '<div class="metric-sub">—</div>'}
+          <div class="metric-value" id="mTotalGP">—</div>
+          <div class="metric-sub" id="mTotalSub"></div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">vs target</div>
-          <div class="metric-value ${vsTarget === null ? '' : vsTarget >= 90 ? '' : vsTarget >= 70 ? 'amber' : 'red'}">
-            ${vsTarget !== null ? vsTarget + '%' : '—'}
-          </div>
-          ${d.revenue.target > 0 ? `<div class="metric-sub warn">${fmt(Math.max(0, d.revenue.target - d.revenue.totalGP))} to go</div>` : ''}
+          <div class="metric-label">Placements YTD</div>
+          <div class="metric-value" id="mPlacCount">—</div>
+          <div class="metric-sub" id="mPlacSub"></div>
         </div>
       </div>
     </div>
 
-    <!-- PIPELINE -->
+    <!-- Pipeline -->
     <div class="section">
       <div class="section-title">Pipeline <span>Open jobs &amp; submissions</span></div>
       <div class="metric-grid cols-3" style="margin-bottom:12px;">
         <div class="metric-card">
           <div class="metric-label">Open jobs</div>
-          <div class="metric-value">${d.pipeline.openJobs}</div>
-          <div class="metric-sub">${d.pipeline.openPerm} perm · ${d.pipeline.openContract} contract</div>
+          <div class="metric-value" id="mOpenJobs">—</div>
+          <div class="metric-sub" id="mOpenJobsSub"></div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Submissions</div>
-          <div class="metric-value">${d.pipeline.submissions}</div>
-          <div class="metric-sub">${d.pipeline.interviews} at interview</div>
+          <div class="metric-value" id="mSubs">—</div>
+          <div class="metric-sub" id="mSubsSub"></div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">Offers out</div>
-          <div class="metric-value ${d.pipeline.staleOffers > 0 ? 'amber' : ''}">${d.pipeline.offersOut}</div>
-          ${d.pipeline.staleOffers > 0 ? `<div class="metric-sub warn">${d.pipeline.staleOffers} pending &gt;5 days</div>` : '<div class="metric-sub">—</div>'}
+          <div class="metric-label">Interviews</div>
+          <div class="metric-value" id="mInterviews">—</div>
+          <div class="metric-sub" id="mInterviewsSub"></div>
         </div>
       </div>
-
-      ${byPractice.length ? `
-      <div class="bar-section">
-        <div class="bar-label">Pipeline value by practice</div>
-        ${byPractice.map(p => `
-          <div class="bar-row">
-            <div class="bar-name">${p.name}</div>
-            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(p.value/maxPractice*100)}%"></div></div>
-            <div class="bar-val">${fmt(p.value)}</div>
-          </div>`).join('')}
-      </div>` : ''}
-
-      ${d.submissionsTrend.length ? `
-      <div class="chart-wrap">
-        <canvas id="trendChart"></canvas>
-      </div>` : ''}
+      <div class="bar-section" id="practiceSection" style="display:none;">
+        <div class="bar-label">Open jobs by category</div>
+        <div id="practiceBars"></div>
+      </div>
     </div>
 
-    <!-- CONTRACTORS + PERM -->
+    <!-- Contractors + Perm -->
     <div class="section">
       <div class="section-title">Contractors &amp; placements</div>
       <div class="two-col">
-        <div class="two-col-panel">
-          <div class="panel-head">Contractors on-site (${d.contractors.length})</div>
+        <div class="panel">
+          <div class="panel-head">Active contractors (<span id="contractorCount">0</span>)</div>
           <table class="data-table">
-            <thead><tr><th>Name</th><th>Role</th><th>End</th><th>Status</th></tr></thead>
-            <tbody>
-              ${d.contractors.length ? d.contractors.map(c => `
-                <tr>
-                  <td>${c.name}</td>
-                  <td class="muted">${c.role}</td>
-                  <td class="muted">${c.end}</td>
-                  <td>${contractorStatusPill(c.status)}</td>
-                </tr>`).join('') : '<tr><td colspan="4" class="muted" style="text-align:center;padding:12px;">No active contractors</td></tr>'}
-            </tbody>
+            <thead><tr><th>Name</th><th>Role</th><th>End date</th><th>Status</th></tr></thead>
+            <tbody id="contractorRows"></tbody>
           </table>
         </div>
-        <div class="two-col-panel">
+        <div class="panel">
           <div class="panel-head">Perm placements YTD</div>
           <table class="data-table">
             <thead><tr><th>Consultant</th><th>Count</th><th>Avg fee</th></tr></thead>
-            <tbody>
-              ${d.permPlacements.length ? d.permPlacements.map(p => `
-                <tr>
-                  <td>${p.consultant}</td>
-                  <td>${p.count}</td>
-                  <td class="muted">${fmt(p.avgFee)}</td>
-                </tr>`).join('') : '<tr><td colspan="3" class="muted" style="text-align:center;padding:12px;">No data</td></tr>'}
-            </tbody>
+            <tbody id="permRows"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ACCOUNT HEALTH -->
+    <!-- Account health -->
     <div class="section">
       <div class="section-title">Account health</div>
-      ${flags.length ? `
-      <div class="flags">
-        ${flags.map(f => `
-          <div class="flag flag-${f.type}">
-            <span class="flag-icon">${f.type === 'red' ? '⚠' : f.type === 'amber' ? '⏱' : 'ℹ'}</span>
-            <span>${f.msg}</span>
-          </div>`).join('')}
-      </div>` : `<div class="flag flag-blue"><span class="flag-icon">✓</span><span>No issues flagged for this account</span></div>`}
-
+      <div class="flags" id="flags"></div>
       <hr class="divider">
       <div class="metric-grid cols-3">
         <div class="metric-card">
-          <div class="metric-label">Calls this month</div>
-          <div class="metric-value">${d.relationship.callsThisMonth}</div>
+          <div class="metric-label">Notes this month</div>
+          <div class="metric-value" id="mNotes">—</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">NPS (last survey)</div>
-          <div class="metric-value ${d.relationship.nps ? (d.relationship.nps >= 8 ? '' : d.relationship.nps >= 6 ? 'amber' : 'red') : ''}">${d.relationship.nps !== null ? d.relationship.nps : '—'}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Hiring manager contacts</div>
-          <div class="metric-value">${d.relationship.contacts}</div>
+          <div class="metric-label">Total contacts</div>
+          <div class="metric-value" id="mContacts">—</div>
           <div class="metric-sub">on record</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">All-time fill rate</div>
+          <div class="metric-value" id="mFillRate">—</div>
+          <div class="metric-sub" id="mFillRateSub"></div>
         </div>
       </div>
     </div>
-  `;
+  </div>
 
-  document.getElementById('root').innerHTML = html;
+<script>
+  // ── Helpers ──────────────────────────────────────────────────────
+  const ONE_DAY = 86400000;
+  const getParam = k => new URLSearchParams(location.search).get(k);
+  const daysSince = ts => Math.round((Date.now() - ts) / ONE_DAY);
+  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  // Render submissions trend chart if data present
-  if (d.submissionsTrend.length) {
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: d.submissionsTrend.map((_,i) => `W${i+1}`),
-        datasets: [{
-          label: 'Submissions',
-          data: d.submissionsTrend,
-          borderColor: '#0d6dcd',
-          backgroundColor: 'rgba(13,109,205,0.08)',
-          pointBackgroundColor: '#0d6dcd',
-          pointRadius: 3,
-          borderWidth: 2,
-          tension: 0.4,
-          fill: true,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 10, family: "'Source Sans 3', sans-serif" }, color: '#94a3b8' } },
-          y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10, family: "'Source Sans 3', sans-serif" }, color: '#94a3b8', stepSize: 5 } },
-        }
+  function fmt(n) {
+    if (n == null || isNaN(n)) return '—';
+    if (n === 0) return '£0';
+    if (n >= 1000000) return '£' + (n/1000000).toFixed(1) + 'm';
+    if (n >= 1000) return '£' + Math.round(n/1000) + 'k';
+    return '£' + Math.round(n).toLocaleString();
+  }
+
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'2-digit' });
+  }
+
+  function contractorPill(s) {
+    const map = { 'Finishing':'pill-red', 'Extending':'pill-amber', 'May Extend':'pill-green', 'Not Extending':'pill-red', 'Unknown':'pill-gray' };
+    return `<span class="pill ${map[s]||'pill-gray'}">${esc(s||'Unknown')}</span>`;
+  }
+
+  // ── AppBridge ────────────────────────────────────────────────────
+  let regAttempts = 0;
+  const MAX_REG = 5;
+
+  function register() {
+    regAttempts++;
+    postRobot.sendToParent('register', { title: 'Account Management' }, { timeout: 6000 })
+      .then(() => onRegistered(true))
+      .catch(() => {
+        if (regAttempts < MAX_REG) setTimeout(register, 600);
+        else onRegistered(false);
+      });
+  }
+
+  function bhGet(relativeURL) {
+    return postRobot.sendToParent('httpGET', { relativeURL }, { timeout: 20000 })
+      .then(evt => {
+        const p = evt.data;
+        if (!p) throw new Error('Empty response');
+        if (p.error) throw new Error(JSON.stringify(p.error));
+        return p.data;
+      });
+  }
+
+  function bhPost(relativeURL, body) {
+    return postRobot.sendToParent('httpPOST', { relativeURL, data: body }, { timeout: 20000 })
+      .then(evt => {
+        const p = evt.data;
+        if (!p) throw new Error('Empty response');
+        if (p.error) throw new Error(JSON.stringify(p.error));
+        return p.data;
+      });
+  }
+
+  // ── API calls ────────────────────────────────────────────────────
+  async function fetchCorp(id) {
+    const fields = 'id,name,status,type,owner(id,firstName,lastName),address(city,countryName),phone,numEmployees,annualRevenue';
+    const res = await bhGet(`entity/ClientCorporation/${id}?fields=${fields}&meta=off`);
+    return res.data || res;
+  }
+
+  async function fetchJobs(corpId) {
+    // Open jobs on this company
+    const res = await bhPost('search/JobOrder', {
+      query: `clientCorporation.id:${corpId} AND isDeleted:false AND isOpen:true`,
+      fields: 'id,title,status,employmentType,numOpenings,dateAdded,owner(id,firstName,lastName),categories(name)',
+      count: 200, start: 0, sort: '-dateAdded'
+    });
+    return res.data || [];
+  }
+
+  async function fetchSubmissions(corpId) {
+    // Active submissions on this company's jobs
+    const res = await bhPost('search/JobSubmission', {
+      query: `jobOrder.clientCorporation.id:${corpId} AND isDeleted:false`,
+      fields: 'id,status,dateAdded,candidate(id,firstName,lastName),jobOrder(id,title)',
+      count: 200, start: 0, sort: '-dateAdded'
+    });
+    return res.data || [];
+  }
+
+  async function fetchPlacements(corpId) {
+    // All placements this year for this company
+    const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
+    const res = await bhPost('search/Placement', {
+      query: `clientCorporation.id:${corpId} AND isDeleted:false AND dateAdded:[${yearStart} TO *]`,
+      fields: 'id,status,dateAdded,startDate,endDate,employmentType,fee,flatFee,salary,clientBillRate,hoursPerWeek,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName),customText1',
+      count: 200, start: 0, sort: '-dateAdded'
+    });
+    return res.data || [];
+  }
+
+  async function fetchAllPlacements(corpId) {
+    // All-time placements for fill rate
+    const res = await bhPost('search/Placement', {
+      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
+      fields: 'id,status',
+      count: 500, start: 0
+    });
+    return res.data || [];
+  }
+
+  async function fetchNotes(corpId) {
+    const res = await bhPost('search/Note', {
+      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
+      fields: 'id,dateAdded,action,commentingPerson(id,firstName,lastName)',
+      count: 100, start: 0, sort: '-dateAdded'
+    });
+    return res.data || [];
+  }
+
+  async function fetchContacts(corpId) {
+    const res = await bhPost('search/ClientContact', {
+      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
+      fields: 'id,firstName,lastName,title,email,status',
+      count: 200, start: 0
+    });
+    return res.data || [];
+  }
+
+  async function fetchAllJobs(corpId) {
+    // All-time jobs for fill rate calculation
+    const res = await bhPost('search/JobOrder', {
+      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
+      fields: 'id,status',
+      count: 500, start: 0
+    });
+    return res.data || [];
+  }
+
+  // ── Analysis ─────────────────────────────────────────────────────
+  function analyse(corp, jobs, submissions, placements, allPlacements, notes, contacts, allJobs) {
+    const now = Date.now();
+    const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
+
+    // Revenue — try multiple fee fields in priority order
+    const permPlacs    = placements.filter(p => p.employmentType === 'Permanent' || p.employmentType === 'Direct Hire');
+    const contractPlacs= placements.filter(p => p.employmentType !== 'Permanent' && p.employmentType !== 'Direct Hire');
+
+    // Fee priority: fee > flatFee > salary (perm); clientBillRate * hoursPerWeek * weeks (contract)
+    const permFees = permPlacs.reduce((sum, p) => {
+      const v = p.fee || p.flatFee || p.salary || 0;
+      return sum + v;
+    }, 0);
+
+    const contractGP = contractPlacs.reduce((sum, p) => {
+      // clientBillRate is typically hourly; use as a proxy if no GP field
+      const v = p.fee || p.flatFee || 0;
+      return sum + v;
+    }, 0);
+
+    const totalGP = permFees + contractGP;
+
+    // Placements by consultant (perm YTD)
+    const byConsultant = {};
+    permPlacs.forEach(p => {
+      const name = p.owner ? `${p.owner.firstName} ${p.owner.lastName}` : 'Unknown';
+      if (!byConsultant[name]) byConsultant[name] = { count: 0, fees: 0 };
+      byConsultant[name].count++;
+      byConsultant[name].fees += (p.fee || p.flatFee || p.salary || 0);
+    });
+    const permByConsultant = Object.entries(byConsultant)
+      .map(([name, d]) => ({ name, count: d.count, avgFee: d.count ? Math.round(d.fees / d.count) : 0 }))
+      .sort((a,b) => b.count - a.count)
+      .slice(0, 6);
+
+    // Active contractors
+    const activeContractors = contractPlacs
+      .filter(p => p.status === 'Approved' || p.status === 'Active' || (p.endDate && p.endDate > now))
+      .map(p => ({
+        name:   p.candidate ? `${p.candidate.firstName} ${p.candidate.lastName}`.trim() : '—',
+        role:   p.jobOrder  ? p.jobOrder.title : '—',
+        end:    fmtDate(p.endDate),
+        endTs:  p.endDate || 0,
+        status: p.customText1 || deriveContractorStatus(p),
+      }))
+      .sort((a,b) => a.endTs - b.endTs);
+
+    function deriveContractorStatus(p) {
+      if (!p.endDate) return 'Unknown';
+      const daysLeft = Math.round((p.endDate - now) / ONE_DAY);
+      if (daysLeft < 0)  return 'Finishing';
+      if (daysLeft <= 30) return 'Finishing';
+      if (daysLeft <= 90) return 'Extending';
+      return 'May Extend';
+    }
+
+    // Pipeline
+    const openPerm     = jobs.filter(j => j.employmentType === 'Permanent' || j.employmentType === 'Direct Hire').length;
+    const openContract = jobs.filter(j => j.employmentType !== 'Permanent' && j.employmentType !== 'Direct Hire').length;
+
+    // Category breakdown of open jobs
+    const catMap = {};
+    jobs.forEach(j => {
+      const cats = j.categories?.data || [];
+      if (cats.length) {
+        cats.forEach(c => { catMap[c.name] = (catMap[c.name]||0) + 1; });
+      } else {
+        catMap['Uncategorised'] = (catMap['Uncategorised']||0) + 1;
       }
     });
-  }
-}
+    const byCategory = Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0,5);
 
-/* ─────────────────────────────────────────────
-   BOOT — AppBridge handshake
-───────────────────────────────────────────── */
-(async () => {
-  try {
-    // Try AppBridge
-    const appResponse = await postRobot.send(window.parent, 'getAppContext', {}, { timeout: 5000 });
-    const { BhRestToken, restUrl, entityId } = appResponse.data;
-    const baseUrl = (restUrl || CONFIG.restUrl).replace(/\/$/, '');
-    CONFIG.restUrl = baseUrl;
-    const data = await loadData(BhRestToken, entityId);
-    render(data);
-  } catch (appErr) {
-    // No AppBridge — try URL params (e.g. ?EntityID=123)
-    const params = new URLSearchParams(window.location.search);
-    const entityId = params.get('EntityID') || params.get('entityId');
-    if (entityId) {
-      try {
-        // Auth token from URL (Partner API flow) if available
-        const token = params.get('BhRestToken') || params.get('token');
-        if (token) {
-          const data = await loadData(token, entityId);
-          render(data);
-          return;
-        }
-      } catch (e) { /* fall through to demo */ }
+    // Submissions analysis
+    const totalSubs = submissions.length;
+    const interviews = submissions.filter(s => {
+      const st = (s.status||'').toLowerCase();
+      return st.includes('interview') || st.includes('1st') || st.includes('2nd') || st.includes('3rd');
+    }).length;
+
+    // Notes
+    const thisMonthStart = new Date(); thisMonthStart.setDate(1); thisMonthStart.setHours(0,0,0,0);
+    const notesThisMonth = notes.filter(n => n.dateAdded >= thisMonthStart.getTime()).length;
+    const lastNoteTs = notes.length ? Math.max(...notes.map(n => n.dateAdded)) : null;
+    const lastActivity = lastNoteTs ? `${daysSince(lastNoteTs)} days ago` : '—';
+
+    // Fill rate
+    const filledStatuses = ['Placed','Completed','Approved'];
+    const totalJobCount  = allJobs.length;
+    const filledJobCount = allPlacements.filter(p => filledStatuses.includes(p.status)).length;
+    const fillRate = totalJobCount > 0 ? Math.round((filledJobCount / totalJobCount) * 100) : null;
+
+    // Flags
+    const flags = [];
+    activeContractors.filter(c => c.status === 'Finishing').forEach(c => {
+      flags.push({ type:'red', msg:`${c.name} contract ending ${c.end} — review extension or replacement` });
+    });
+    if (notesThisMonth === 0) {
+      flags.push({ type:'amber', msg:'No activity logged this month — schedule an account touchpoint' });
     }
-    // Demo mode fallback
-    render(MOCK);
+    const staleSubs = submissions.filter(s => {
+      const st = (s.status||'').toLowerCase();
+      return st.includes('offer') && daysSince(s.dateAdded) > 5;
+    }).length;
+    if (staleSubs > 0) {
+      flags.push({ type:'amber', msg:`${staleSubs} offer${staleSubs>1?'s':''} pending >5 days — chase for decision` });
+    }
+    if (flags.length === 0) {
+      flags.push({ type:'green', msg:'No issues flagged for this account' });
+    }
+
+    return {
+      corpName: corp.name,
+      owner: corp.owner ? `${corp.owner.firstName} ${corp.owner.lastName}` : '—',
+      type: corp.type || '—',
+      lastActivity,
+      permFees, contractGP, totalGP,
+      placCount: placements.length,
+      permByConsultant,
+      activeContractors,
+      openJobs: jobs.length, openPerm, openContract,
+      totalSubs, interviews,
+      byCategory,
+      notesThisMonth,
+      contactCount: contacts.length,
+      fillRate, filledJobCount, totalJobCount,
+      flags,
+    };
   }
-})();
+
+  // ── Render ───────────────────────────────────────────────────────
+  function render(d) {
+    // Header
+    document.getElementById('corpName').textContent = d.corpName;
+    document.getElementById('corpMeta').innerHTML =
+      `Owner: <strong>${esc(d.owner)}</strong>&nbsp;·&nbsp;${esc(d.type)}`;
+    document.getElementById('lastContact').textContent = d.lastActivity;
+    document.getElementById('revYear').textContent = `YTD · FY ${new Date().getFullYear()}`;
+
+    // Revenue
+    document.getElementById('mPermFees').textContent   = fmt(d.permFees);
+    document.getElementById('mContractGP').textContent = fmt(d.contractGP);
+    document.getElementById('mTotalGP').textContent    = fmt(d.totalGP);
+    document.getElementById('mPlacCount').textContent  = d.placCount;
+    document.getElementById('mPermSub').textContent    = `${d.permByConsultant.length} consultants`;
+    document.getElementById('mContractSub').textContent= `${d.activeContractors.length} active contractors`;
+    document.getElementById('mTotalSub').textContent   = 'perm + contract';
+    document.getElementById('mPlacSub').textContent    = `perm + contract`;
+
+    // Pipeline
+    document.getElementById('mOpenJobs').textContent     = d.openJobs;
+    document.getElementById('mOpenJobsSub').textContent  = `${d.openPerm} perm · ${d.openContract} contract`;
+    document.getElementById('mSubs').textContent         = d.totalSubs;
+    document.getElementById('mSubsSub').textContent      = `active submissions`;
+    document.getElementById('mInterviews').textContent   = d.interviews;
+    document.getElementById('mInterviewsSub').textContent= 'at interview stage';
+
+    // Category bars
+    if (d.byCategory.length > 0) {
+      document.getElementById('practiceSection').style.display = '';
+      const maxCat = d.byCategory[0][1];
+      document.getElementById('practiceBars').innerHTML = d.byCategory.map(([name, count]) => `
+        <div class="bar-row">
+          <div class="bar-name">${esc(name)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxCat*100)}%"></div></div>
+          <div class="bar-val" style="color:var(--muted); font-weight:400;">${count} job${count>1?'s':''}</div>
+        </div>`).join('');
+    }
+
+    // Contractors
+    document.getElementById('contractorCount').textContent = d.activeContractors.length;
+    document.getElementById('contractorRows').innerHTML = d.activeContractors.length
+      ? d.activeContractors.map(c => `
+          <tr>
+            <td>${esc(c.name)}</td>
+            <td class="muted">${esc(c.role)}</td>
+            <td class="muted">${esc(c.end)}</td>
+            <td>${contractorPill(c.status)}</td>
+          </tr>`).join('')
+      : `<tr><td colspan="4" class="empty-row">No active contractors</td></tr>`;
+
+    // Perm by consultant
+    document.getElementById('permRows').innerHTML = d.permByConsultant.length
+      ? d.permByConsultant.map(p => `
+          <tr>
+            <td>${esc(p.name)}</td>
+            <td>${p.count}</td>
+            <td class="muted">${p.avgFee > 0 ? fmt(p.avgFee) : '—'}</td>
+          </tr>`).join('')
+      : `<tr><td colspan="3" class="empty-row">No perm placements YTD</td></tr>`;
+
+    // Flags
+    document.getElementById('flags').innerHTML = d.flags.map(f => `
+      <div class="flag flag-${f.type}">
+        <span class="flag-icon">${f.type==='red'?'⚠':'f.type'==='green'?'✓':'⏱'}</span>
+        <span>${esc(f.msg)}</span>
+      </div>`).join('');
+
+    // Health metrics
+    document.getElementById('mNotes').textContent    = d.notesThisMonth;
+    document.getElementById('mContacts').textContent = d.contactCount;
+    if (d.fillRate !== null) {
+      document.getElementById('mFillRate').textContent    = d.fillRate + '%';
+      document.getElementById('mFillRateSub').textContent = `${d.filledJobCount} of ${d.totalJobCount} jobs`;
+    } else {
+      document.getElementById('mFillRate').textContent = '—';
+    }
+
+    setState(null);
+    document.getElementById('card').classList.add('visible');
+  }
+
+  // ── State management ──────────────────────────────────────────────
+  function setState(id) {
+    ['stateLoading','stateNoConn','stateError'].forEach(s =>
+      document.getElementById(s).classList.add('hidden')
+    );
+    if (id) document.getElementById(id).classList.remove('hidden');
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────
+  async function onRegistered(ok) {
+    const entityId = parseInt(getParam('EntityID'), 10);
+    const userId   = parseInt(getParam('UserID'),   10);
+    const corpId   = parseInt(getParam('CorporationID'), 10);
+    const plId     = parseInt(getParam('PrivateLabelID'), 10);
+
+    if (!ok || !entityId || !userId || !corpId || !plId) {
+      setState('stateNoConn'); return;
+    }
+
+    try {
+      // Fetch all data in parallel
+      const [corp, jobs, submissions, placements, allPlacements, notes, contacts, allJobs] = await Promise.all([
+        fetchCorp(entityId),
+        fetchJobs(entityId),
+        fetchSubmissions(entityId),
+        fetchPlacements(entityId),
+        fetchAllPlacements(entityId),
+        fetchNotes(entityId),
+        fetchContacts(entityId),
+        fetchAllJobs(entityId),
+      ]);
+
+      const data = analyse(corp, jobs, submissions, placements, allPlacements, notes, contacts, allJobs);
+      render(data);
+    } catch (err) {
+      console.error('AccountCard:', err);
+      setState('stateError');
+      document.getElementById('errMsg').textContent = err.message || String(err);
+    }
+  }
+
+  async function init() {
+    setState('stateLoading');
+    document.getElementById('card').classList.remove('visible');
+    regAttempts = 0;
+    register();
+  }
+
+  window.addEventListener('load', init);
 </script>
 </body>
 </html>
