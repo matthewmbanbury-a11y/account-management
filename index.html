@@ -4,363 +4,68 @@
   <meta charset="UTF-8" />
   <title>Account Management</title>
   <script src="//cdn.rawgit.com/krakenjs/post-robot/7da06445/dist/post-robot.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
-    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-    :root {
-      --bg:#0d1117; --surface:#161b22; --border:#21262d;
-      --text:#e6edf3; --muted:#8b949e;
-      --blue:#58a6ff; --green:#3fb950; --yellow:#d29922; --red:#f78166; --purple:#bc8cff;
-    }
-    html,body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); font-size:13px; }
-
-    .hdr { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:1px solid var(--border); }
-    .hdr-title { font-size:13px; font-weight:600; }
-    .hdr-sub { font-size:10px; color:var(--muted); margin-top:1px; }
-    .badges { display:flex; gap:5px; flex-wrap:wrap; }
-    .badge { font-family:'DM Mono',monospace; font-size:10px; padding:2px 7px; border-radius:20px; font-weight:500; white-space:nowrap; }
-    .b-blue   { background:rgba(88,166,255,.15); color:var(--blue);   border:1px solid rgba(88,166,255,.3); }
-    .b-green  { background:rgba(63,185,80,.15);  color:var(--green);  border:1px solid rgba(63,185,80,.3); }
-    .b-yellow { background:rgba(210,153,34,.15); color:var(--yellow); border:1px solid rgba(210,153,34,.3); }
-    .b-red    { background:rgba(247,129,102,.15);color:var(--red);    border:1px solid rgba(247,129,102,.3); }
-
-    .stats { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--border); }
-    .stat { padding:9px 12px; border-right:1px solid var(--border); }
-    .stat:last-child { border-right:none; }
-    .stat-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:3px; }
-    .stat-value { font-family:'DM Mono',monospace; font-size:18px; font-weight:500; line-height:1; }
-    .stat-sub { font-size:10px; color:var(--muted); margin-top:3px; }
-    .c-green { color:var(--green); } .c-yellow { color:var(--yellow); } .c-red { color:var(--red); } .c-blue { color:var(--blue); }
-
-    .insights { border-bottom:1px solid var(--border); padding:8px 14px; display:flex; flex-direction:column; gap:5px; }
-    .insight { display:flex; align-items:flex-start; gap:7px; font-size:11px; line-height:1.4; }
-    .insight-icon { flex-shrink:0; margin-top:1px; }
-    .insight.warn  { color:var(--yellow); }
-    .insight.alert { color:var(--red); }
-    .insight.good  { color:var(--green); }
-    .insight.info  { color:var(--muted); }
-
-    .sec-title { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; padding:8px 14px 4px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; }
-    .sec-title span { font-family:'DM Mono',monospace; }
-
-    .row { display:flex; align-items:center; gap:9px; padding:8px 14px; border-bottom:1px solid var(--border); }
-    .row:last-child { border-bottom:none; }
-    .rag { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .rag-green  { background:var(--green);  box-shadow:0 0 5px rgba(63,185,80,.5); }
-    .rag-yellow { background:var(--yellow); box-shadow:0 0 5px rgba(210,153,34,.5); }
-    .rag-red    { background:var(--red);    box-shadow:0 0 5px rgba(247,129,102,.5); }
-    .rag-gray   { background:var(--border); }
-    .row-info { flex:1; min-width:0; }
-    .row-title { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .row-meta  { font-size:10px; color:var(--muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .row-right { display:flex; gap:10px; align-items:center; flex-shrink:0; }
-    .row-nums { display:flex; gap:12px; }
-    .num { text-align:right; }
-    .num-val { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
-    .num-lbl { font-size:9px; color:var(--muted); }
-    .pill { font-family:'DM Mono',monospace; font-size:9px; padding:2px 6px; border-radius:12px; flex-shrink:0; white-space:nowrap; }
-    .p-perm     { background:rgba(63,185,80,.15);  color:var(--green);  border:1px solid rgba(63,185,80,.3); }
-    .p-contract { background:rgba(88,166,255,.15); color:var(--blue);   border:1px solid rgba(88,166,255,.3); }
-    .p-sow      { background:rgba(188,140,255,.15);color:var(--purple); border:1px solid rgba(188,140,255,.3); }
-    .p-gray     { background:rgba(139,148,158,.1); color:var(--muted);  border:1px solid var(--border); }
-    .p-red      { background:rgba(247,129,102,.15);color:var(--red);    border:1px solid rgba(247,129,102,.3); }
-    .p-yellow   { background:rgba(210,153,34,.15); color:var(--yellow); border:1px solid rgba(210,153,34,.3); }
-
-    .avatar { width:26px; height:26px; border-radius:50%; background:rgba(88,166,255,.15); border:1px solid rgba(88,166,255,.3); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:var(--blue); flex-shrink:0; }
-
-    .empty { padding:12px 14px; font-size:11px; color:var(--muted); }
-    .state { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:32px 20px; }
-    .state-msg { font-size:11px; color:var(--muted); }
-    .spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin .75s linear infinite; }
-    @keyframes spin { to{transform:rotate(360deg)} }
-  </style>
 </head>
-<body>
-  <div id="root"><div class="state"><div class="spinner"></div><div class="state-msg">Loading…</div></div></div>
-
+<body style="font-family:monospace;font-size:11px;padding:10px;background:#0d1117;color:#e6edf3;white-space:pre-wrap;word-break:break-all;">
+<div id="out">Connecting…</div>
 <script>
   const getParam = k => new URLSearchParams(location.search).get(k);
-  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const ONE_DAY = 86400000;
-  const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}) : '—';
-  const daysAgo = ts => Math.round((Date.now()-ts)/ONE_DAY);
-  const daysFrom = ts => Math.round((ts-Date.now())/ONE_DAY);
-  const initials = (f,l) => ((f||'')[0]||'').toUpperCase()+((l||'')[0]||'').toUpperCase();
-  const fmtRate = r => r ? '£'+Math.round(r)+'/day' : '—';
-
+  const out = document.getElementById('out');
   let attempts = 0;
+
   function register() {
     attempts++;
     postRobot.sendToParent('register', { title: 'Account Management' }, { timeout: 5000 })
       .then(() => run())
-      .catch(() => { if (attempts < 4) setTimeout(register, 500); else show('<div class="state"><div class="state-msg">No AppBridge</div></div>'); });
-  }
-
-  async function post(url, data) {
-    const evt = await postRobot.sendToParent('httpPOST', { relativeURL: url, data }, { timeout: 20000 });
-    return evt.data?.data?.data || [];
-  }
-
-  async function get(url) {
-    const evt = await postRobot.sendToParent('httpGET', { relativeURL: url }, { timeout: 20000 });
-    return evt.data?.data || {};
+      .catch(() => { if (attempts < 4) setTimeout(register, 500); else out.textContent = 'No AppBridge'; });
   }
 
   async function run() {
     const entityId = parseInt(getParam('EntityID'), 10);
+    out.textContent = `EntityID: ${entityId}\n\n`;
+    const results = {};
+
+    // Test 1: Opportunity search — does it support clientCorporation.id?
     try {
-      // Step 1 — all jobs (open + closed) to collect placement IDs, plus open job detail
-      const [allJobs, openJobs, contacts, notesRaw] = await Promise.all([
-        post('search/JobOrder', {
+      const evt = await postRobot.sendToParent('httpPOST', {
+        relativeURL: 'search/Opportunity',
+        data: {
           query: `clientCorporation.id:${entityId} AND isDeleted:false`,
-          fields: 'id,placements[50](id)',
-          count: 500, start: 0
-        }),
-        post('search/JobOrder', {
-          query: `clientCorporation.id:${entityId} AND isDeleted:false AND isOpen:true`,
-          fields: 'id,title,status,employmentType,dateAdded,owner(id,firstName,lastName),submissions[100](dateAdded,status),placements[50](dateAdded)',
-          count: 200, start: 0, sort: '-dateAdded'
-        }),
-        post('search/ClientContact', {
+          fields: 'id,title,status,dateAdded,clientContact(id,firstName,lastName),owner(id,firstName,lastName),weightedRevenue,expectedFee',
+          count: 3, start: 0, sort: '-dateAdded'
+        }
+      }, { timeout: 20000 });
+      results.opportunities = evt.data;
+    } catch(e) { results.opp_error = e.message; }
+
+    // Test 2: Jobs with clientContact field — who gave us the job?
+    try {
+      const evt = await postRobot.sendToParent('httpPOST', {
+        relativeURL: 'search/JobOrder',
+        data: {
           query: `clientCorporation.id:${entityId} AND isDeleted:false`,
-          fields: 'id,firstName,lastName,email,occupation,dateLastModified',
-          count: 100, start: 0, sort: '-dateLastModified'
-        }),
-        get(`allCorpNotes?clientCorpId=${entityId}&fields=id,dateAdded,action,commentingPerson(id,firstName,lastName),comments&count=10&start=0&sort=-dateAdded`)
-      ]);
+          fields: 'id,title,clientContact(id,firstName,lastName)',
+          count: 5, start: 0, sort: '-dateAdded'
+        }
+      }, { timeout: 20000 });
+      results.jobs_with_contact = evt.data;
+    } catch(e) { results.jobs_contact_error = e.message; }
 
-      const notes = notesRaw.data || [];
+    // Test 3: Placements with fee fields for revenue
+    try {
+      const evt = await postRobot.sendToParent('httpPOST', {
+        relativeURL: 'search/Placement',
+        data: {
+          query: 'id:21779 OR id:25940 OR id:25181',
+          fields: 'id,status,dateBegin,dateEnd,employmentType,fee,flatFee,salary,clientBillRate,hoursPerDay,daysGuaranteed',
+          count: 3, start: 0
+        }
+      }, { timeout: 20000 });
+      results.placement_fees = evt.data;
+    } catch(e) { results.placement_fees_error = e.message; }
 
-      // Collect all placement IDs from all jobs
-      const placIds = [];
-      allJobs.forEach(j => (j.placements?.data||[]).forEach(p => { if (!placIds.includes(p.id)) placIds.push(p.id); }));
-
-      // Step 2 — fetch placements in batches of 50
-      let placements = [];
-      if (placIds.length) {
-        const batches = [];
-        for (let i = 0; i < Math.min(placIds.length, 150); i += 50)
-          batches.push(placIds.slice(i, i+50));
-
-        const batchResults = await Promise.all(batches.map(batch =>
-          post('search/Placement', {
-            query: batch.map(id => `id:${id}`).join(' OR '),
-            fields: 'id,status,dateAdded,dateBegin,dateEnd,employmentType,clientBillRate,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName)',
-            count: 50, start: 0
-          })
-        ));
-        placements = batchResults.flat();
-      }
-
-      render(entityId, openJobs, placements, allJobs.length, contacts, notes);
-    } catch(err) {
-      show(`<div class="state"><div class="state-msg">Error: ${esc(err.message)}</div></div>`);
-      console.error(err);
-    }
+    out.textContent += JSON.stringify(results, null, 2);
   }
 
-  function jobRag(j) {
-    const now = Date.now();
-    const subs  = j.submissions?.data || [];
-    const placs = j.placements?.data  || [];
-    const daysOpen = Math.round((now - j.dateAdded) / ONE_DAY);
-    const subDates = subs.map(s => s.dateAdded).sort((a,b) => b-a);
-    const daysSinceSub = subDates.length ? Math.round((now - subDates[0]) / ONE_DAY) : daysOpen;
-    const interviews = subs.filter(s => /interview|1st|2nd|3rd|shortlist/i.test(s.status||'')).length;
-    let rag = 'green';
-    if      (placs.length)                                         rag = 'green';
-    else if (daysOpen > 60 || (daysSinceSub > 14 && subs.length)) rag = 'red';
-    else if (daysOpen > 30 || daysSinceSub > 7)                   rag = 'yellow';
-    return { daysOpen, subs: subs.length, interviews, placs: placs.length, daysSinceSub, rag };
-  }
-
-  function placPill(p) {
-    const now = Date.now();
-    const st = (p.status||'').toLowerCase();
-    if (st === 'approved' || st === 'extension') {
-      const left = p.dateEnd ? daysFrom(p.dateEnd) : null;
-      if (left === null) return { cls:'p-gray', label:'Active' };
-      if (left < 0)      return { cls:'p-red',  label:'Ended' };
-      if (left <= 30)    return { cls:'p-yellow',label:`${left}d left` };
-      return { cls:'p-contract', label:`${left}d left` };
-    }
-    if (st === 'terminated') return { cls:'p-red',  label:'Terminated' };
-    if (st === 'legacy')     return { cls:'p-gray', label:'Legacy' };
-    return { cls:'p-gray', label:p.status||'—' };
-  }
-
-  function typePill(type) {
-    const t = (type||'').toLowerCase();
-    if (t.includes('perm') || t.includes('direct')) return 'p-perm';
-    if (t === 'sow') return 'p-sow';
-    return 'p-contract';
-  }
-
-  function render(entityId, openJobs, placements, totalJobCount, contacts, notes) {
-    const now = Date.now();
-    const jm = openJobs.map(j => ({ j, m: jobRag(j) }));
-
-    // ── Placement analysis ──
-    const activePlacs = placements.filter(p => {
-      const st = (p.status||'').toLowerCase();
-      return (st === 'approved' || st === 'extension') && p.dateEnd && p.dateEnd > now;
-    });
-    const endingSoon = activePlacs.filter(p => daysFrom(p.dateEnd) <= 30);
-    const totalPlacs = placements.length;
-    const fillRate = totalJobCount > 0 ? Math.round(totalPlacs / totalJobCount * 100) : 0;
-
-    // ── Job stats ──
-    const totSubs = jm.reduce((s,x) => s+x.m.subs, 0);
-    const totInt  = jm.reduce((s,x) => s+x.m.interviews, 0);
-    const atRisk  = jm.filter(x => x.m.rag==='red').length;
-    const lastNote = notes[0] || null;
-    const daysSinceContact = lastNote ? daysAgo(lastNote.dateAdded) : null;
-
-    // ── Insights ──
-    const insights = [];
-    if (atRisk > 0)
-      insights.push({ type:'alert', icon:'🔴', msg:`${atRisk} open job${atRisk>1?'s':''} at risk — stalled or overdue` });
-    jm.forEach(({j,m}) => {
-      if (m.subs===0 && m.daysOpen>7)
-        insights.push({ type:'warn', icon:'⏸', msg:`${j.title} — open ${m.daysOpen}d with no CVs sent` });
-      else if (m.subs>0 && m.daysSinceSub>10 && !m.placs)
-        insights.push({ type:'warn', icon:'📭', msg:`${j.title} — no CV sent in ${m.daysSinceSub} days` });
-    });
-    if (endingSoon.length > 0)
-      insights.push({ type:'warn', icon:'⏰', msg:`${endingSoon.length} contractor${endingSoon.length>1?'s':''} ending within 30 days — extension conversation needed` });
-    if (daysSinceContact !== null && daysSinceContact > 14)
-      insights.push({ type:'warn', icon:'📞', msg:`Last activity ${daysSinceContact} days ago — consider an account touchpoint` });
-    else if (daysSinceContact !== null && daysSinceContact <= 3)
-      insights.push({ type:'good', icon:'✅', msg:`Active account — last contact ${daysSinceContact} day${daysSinceContact===1?'':'s'} ago` });
-    const owners = [...new Set(jm.map(x => x.j.owner?`${x.j.owner.firstName} ${x.j.owner.lastName}`:null).filter(Boolean))];
-    if (owners.length === 1 && jm.length > 2)
-      insights.push({ type:'warn', icon:'⚠', msg:`Single point of failure — all ${jm.length} jobs owned by ${owners[0]}` });
-    if (fillRate > 0)
-      insights.push({ type:'info', icon:'📊', msg:`${fillRate}% fill rate — ${totalPlacs} placements from ${totalJobCount} jobs all time` });
-    if (insights.length === 0)
-      insights.push({ type:'good', icon:'✅', msg:'No issues flagged — account looks healthy' });
-
-    // ── Stats row ──
-    const statsHtml = `
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">Open Jobs</div>
-          <div class="stat-value ${atRisk?'c-yellow':''}">${openJobs.length}</div>
-          <div class="stat-sub">${atRisk?`<span class="c-red">${atRisk} at risk</span>`:'all active'}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">CVs / Interviews</div>
-          <div class="stat-value">${totSubs}</div>
-          <div class="stat-sub">${totInt} at interview</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Active Contractors</div>
-          <div class="stat-value ${activePlacs.length?'c-green':'c-yellow'}">${activePlacs.length}</div>
-          <div class="stat-sub">${endingSoon.length?`<span class="c-red">${endingSoon.length} ending soon</span>`:`${totalPlacs} all time`}</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Fill Rate</div>
-          <div class="stat-value ${fillRate>=50?'c-green':fillRate>=30?'c-yellow':'c-red'}">${fillRate}%</div>
-          <div class="stat-sub">${totalPlacs}/${totalJobCount} jobs</div>
-        </div>
-      </div>`;
-
-    // ── Job rows ──
-    const jobRows = jm.length ? jm.map(({j,m}) => {
-      const owner = j.owner?`${j.owner.firstName} ${j.owner.lastName}`:'—';
-      return `
-        <div class="row">
-          <div class="rag rag-${m.rag}"></div>
-          <div class="row-info">
-            <div class="row-title">${esc(j.title||'Untitled')}</div>
-            <div class="row-meta">${esc(owner)} · ${m.daysOpen}d open${m.subs>0?' · last CV '+m.daysSinceSub+'d ago':' · no CVs yet'}</div>
-          </div>
-          <div class="row-right">
-            <div class="row-nums">
-              <div class="num"><div class="num-val ${m.subs===0?'c-red':''}">${m.subs}</div><div class="num-lbl">CVs</div></div>
-              <div class="num"><div class="num-val">${m.interviews}</div><div class="num-lbl">Intrvw</div></div>
-              <div class="num"><div class="num-val ${m.placs?'c-green':''}">${m.placs}</div><div class="num-lbl">Placed</div></div>
-            </div>
-            <span class="pill ${typePill(j.employmentType)}">${esc(j.employmentType||'—')}</span>
-          </div>
-        </div>`;
-    }).join('') : '<div class="empty">No open jobs</div>';
-
-    // ── Active contractor rows ──
-    const contractorRows = activePlacs.length ? activePlacs.sort((a,b) => a.dateEnd-b.dateEnd).map(p => {
-      const name  = p.candidate?`${p.candidate.firstName} ${p.candidate.lastName}`:'—';
-      const role  = p.jobOrder?.title||'—';
-      const owner = p.owner?`${p.owner.firstName} ${p.owner.lastName}`:'—';
-      const pp    = placPill(p);
-      const left  = p.dateEnd ? daysFrom(p.dateEnd) : null;
-      const ragC  = left===null?'rag-gray':left<0?'rag-red':left<=30?'rag-yellow':'rag-green';
-      return `
-        <div class="row">
-          <div class="rag ${ragC}"></div>
-          <div class="row-info">
-            <div class="row-title">${esc(name)}</div>
-            <div class="row-meta">${esc(role)} · ${esc(owner)} · ${fmtRate(p.clientBillRate)} · ends ${fmtDate(p.dateEnd)}</div>
-          </div>
-          <div class="row-right">
-            <span class="pill ${typePill(p.employmentType)}">${esc(p.employmentType||'—')}</span>
-            <span class="pill ${pp.cls}">${pp.label}</span>
-          </div>
-        </div>`;
-    }).join('') : '<div class="empty">No active contractors</div>';
-
-    // ── Contact rows ──
-    const contactRows = contacts.slice(0,5).map(c => {
-      const name = `${(c.firstName||'').trim()} ${(c.lastName||'').trim()}`.trim();
-      return `
-        <div class="row">
-          <div class="avatar">${initials(c.firstName,c.lastName)}</div>
-          <div class="row-info">
-            <div class="row-title">${esc(name)}</div>
-            <div class="row-meta">${esc(c.occupation||'—')}${c.email?' · '+esc(c.email):''}</div>
-          </div>
-          <span class="pill p-gray">updated ${daysAgo(c.dateLastModified)}d ago</span>
-        </div>`;
-    }).join('') || '<div class="empty">No contacts</div>';
-
-    // ── Note rows ──
-    const noteRows = notes.slice(0,5).map(n => {
-      const who  = n.commentingPerson?`${n.commentingPerson.firstName} ${n.commentingPerson.lastName}`:'—';
-      const body = (n.comments||'').replace(/<[^>]+>/g,'').trim().substring(0,90);
-      return `
-        <div class="row">
-          <div class="rag rag-gray"></div>
-          <div class="row-info">
-            <div class="row-title">${esc(n.action||'Note')} · <span style="font-weight:400;color:var(--muted)">${esc(who)}</span></div>
-            <div class="row-meta">${fmtDate(n.dateAdded)}${body?' — '+esc(body):''}</div>
-          </div>
-        </div>`;
-    }).join('') || '<div class="empty">No notes</div>';
-
-    show(`
-      <div class="hdr">
-        <div><div class="hdr-title">Account Management</div>
-        <div class="hdr-sub">${openJobs.length} open · ${activePlacs.length} contractors · ${contacts.length} contacts · last activity ${daysSinceContact!==null?daysSinceContact+'d ago':'unknown'}</div></div>
-        <div class="badges">
-          ${openJobs.length?`<span class="badge b-blue">${openJobs.length} open</span>`:''}
-          ${atRisk?`<span class="badge b-red">${atRisk} at risk</span>`:''}
-          ${activePlacs.length?`<span class="badge b-green">${activePlacs.length} on-site</span>`:''}
-          ${endingSoon.length?`<span class="badge b-yellow">${endingSoon.length} ending soon</span>`:''}
-        </div>
-      </div>
-      ${statsHtml}
-      <div class="insights">${insights.map(i=>`<div class="insight ${i.type}"><span class="insight-icon">${i.icon}</span><span>${esc(i.msg)}</span></div>`).join('')}</div>
-      <div class="sec-title">Open Jobs <span>${openJobs.length}</span></div>
-      ${jobRows}
-      <div class="sec-title">Active Contractors <span>${activePlacs.length} of ${totalPlacs} all time</span></div>
-      ${contractorRows}
-      <div class="sec-title">Key Contacts <span>${contacts.length} total</span></div>
-      ${contactRows}
-      <div class="sec-title">Recent Activity <span>${notes.length} shown</span></div>
-      ${noteRows}
-    `);
-  }
-
-  function show(html) { document.getElementById('root').innerHTML = html; }
   window.addEventListener('load', register);
 </script>
 </body>
