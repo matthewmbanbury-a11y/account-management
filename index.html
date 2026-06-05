@@ -6,13 +6,10 @@
   <script src="//cdn.rawgit.com/krakenjs/post-robot/7da06445/dist/post-robot.js"></script>
 </head>
 <body style="font-family:monospace;font-size:11px;padding:10px;background:#0d1117;color:#e6edf3;white-space:pre-wrap;word-break:break-all;">
-
 <div id="out">Connecting…</div>
-
 <script>
   const getParam = k => new URLSearchParams(location.search).get(k);
   const out = document.getElementById('out');
-
   let attempts = 0;
   function register() {
     attempts++;
@@ -23,38 +20,36 @@
 
   async function run() {
     const entityId = parseInt(getParam('EntityID'), 10);
-    out.textContent = `EntityID: ${entityId}\n\nFetching contacts + appointments…\n`;
-
+    out.textContent = `EntityID: ${entityId}\n\n`;
     const results = {};
 
-    // Test 1: ClientContact via search POST
+    // ClientContact — occupation is the job title field per docs
     try {
       const evt = await postRobot.sendToParent('httpPOST', {
         relativeURL: 'search/ClientContact',
         data: {
           query: `clientCorporation.id:${entityId} AND isDeleted:false`,
-          fields: 'id,firstName,lastName,title,email,phone,status,dateLastModified',
+          fields: 'id,firstName,lastName,email,phone,occupation,dateLastModified',
           count: 3, start: 0, sort: '-dateLastModified'
         }
       }, { timeout: 20000 });
       results.contacts = evt.data;
     } catch(e) { results.contacts_error = e.message; }
 
-    // Test 2: Appointment via search POST
+    // Task
     try {
       const evt = await postRobot.sendToParent('httpPOST', {
-        relativeURL: 'search/Appointment',
+        relativeURL: 'search/Task',
         data: {
           query: `clientCorporation.id:${entityId} AND isDeleted:false`,
-          fields: 'id,subject,dateBegin,dateEnd,type,owner(id,firstName,lastName),clientContactReference(id,firstName,lastName)',
-          count: 3, start: 0, sort: '-dateBegin'
+          fields: 'id,subject,dateAdded,dateDue,status,owner(id,firstName,lastName)',
+          count: 3, start: 0, sort: '-dateAdded'
         }
       }, { timeout: 20000 });
-      results.appointments = evt.data;
-    } catch(e) { results.appointments_error = e.message; }
+      results.tasks = evt.data;
+    } catch(e) { results.tasks_error = e.message; }
 
     out.textContent += JSON.stringify(results, null, 2);
-    console.log('raw results:', results);
   }
 
   window.addEventListener('load', register);
