@@ -47,7 +47,7 @@
       relativeURL: 'search/Placement',
       data: {
         query: idQuery,
-        fields: 'id,status,dateAdded,startDate,endDate,employmentType,fee,flatFee,salary,clientBillRate,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName)',
+        fields: 'id,status,dateAdded,dateBegin,dateEnd,employmentType,fee,flatFee,salary,clientBillRate,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName)',
         count: 10, start: 0
       }
     }, { timeout: 20000 });
