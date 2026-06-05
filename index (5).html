@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Management Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/post-robot/10.0.46/post-robot.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --font: 'Source Sans 3', 'Source Sans Pro', sans-serif;
+    --blue: #0d6dcd;
+    --blue-light: #e8f1fb;
+    --green: #1a7f4b;
+    --green-light: #e6f4ed;
+    --amber: #a35c00;
+    --amber-light: #fef3e2;
+    --red: #b91c1c;
+    --red-light: #fef2f2;
+    --gray: #64748b;
+    --gray-light: #f1f5f9;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --radius: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+    padding: 0 0 24px 0;
+  }
+
+  /* ── Header ── */
+  .acct-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .acct-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .acct-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .acct-meta .sep { color: var(--border); }
+  .last-contact {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .last-contact .lc-label { font-size: 11px; color: var(--text-muted); }
+  .last-contact .lc-value { font-size: 13px; font-weight: 500; margin-top: 1px; }
+
+  /* ── Pill / Badge ── */
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 1px 7px;
+    border-radius: 20px;
+    line-height: 1.6;
+  }
+  .pill-blue   { background: var(--blue-light);  color: var(--blue);  }
+  .pill-green  { background: var(--green-light); color: var(--green); }
+  .pill-amber  { background: var(--amber-light); color: var(--amber); }
+  .pill-red    { background: var(--red-light);   color: var(--red);   }
+  .pill-gray   { background: var(--gray-light);  color: var(--gray);  }
+
+  /* ── Sections ── */
+  .section { padding: 12px 16px 0; }
+  .section + .section { border-top: 1px solid var(--border); margin-top: 12px; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-title span { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; }
+
+  /* ── Metric grid ── */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .metric-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 11px;
+  }
+  .metric-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .metric-value {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .metric-value.amber { color: var(--amber); }
+  .metric-value.red   { color: var(--red);   }
+  .metric-sub {
+    font-size: 11px;
+    margin-top: 2px;
+    color: var(--text-muted);
+  }
+  .metric-sub.up   { color: var(--green); }
+  .metric-sub.down { color: var(--red);   }
+  .metric-sub.warn { color: var(--amber); }
+
+  /* ── Bar chart ── */
+  .bar-section { margin-top: 10px; }
+  .bar-label { font-size: 11px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .bar-name {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 120px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bar-track {
+    flex: 1;
+    background: var(--border);
+    border-radius: 3px;
+    height: 7px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--blue);
+  }
+  .bar-val {
+    font-size: 12px;
+    font-weight: 500;
+    width: 48px;
+    text-align: right;
+    flex-shrink: 0;
+    color: var(--blue);
+  }
+
+  /* ── Tables ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .data-table th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .data-table td {
+    padding: 6px 6px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table td.muted { color: var(--text-muted); }
+
+  /* ── Two-col layout ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .two-col-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .two-col-panel .panel-head {
+    padding: 7px 10px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .two-col-panel .data-table { font-size: 12px; }
+  .two-col-panel .data-table td,
+  .two-col-panel .data-table th { padding: 5px 8px; }
+
+  /* ── Flags ── */
+  .flags { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .flag {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .flag-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .flag-red    { background: var(--red-light);   color: #7f1d1d; border-left: 3px solid var(--red);   }
+  .flag-amber  { background: var(--amber-light);  color: #78350f; border-left: 3px solid var(--amber); }
+  .flag-blue   { background: var(--blue-light);   color: #1e40af; border-left: 3px solid var(--blue);  }
+
+  /* ── Chart ── */
+  .chart-wrap {
+    position: relative;
+    height: 160px;
+    margin-top: 8px;
+  }
+
+  /* ── Divider ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+  /* ── Loading / error states ── */
+  .state-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    font-size: 13px;
+    color: var(--text-muted);
+    flex-direction: column;
+    gap: 8px;
+  }
+  .spinner {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .state-box.error { color: var(--red); }
+  .demo-banner {
+    background: var(--amber-light);
+    border-bottom: 1px solid #fed7aa;
+    padding: 5px 16px;
+    font-size: 11px;
+    color: var(--amber);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div id="root"><div class="state-box"><div class="spinner"></div><span>Loading account data…</span></div></div>
+
+<script>
+/* ─────────────────────────────────────────────
+   CONFIG — update these to match your instance
+───────────────────────────────────────────── */
+const CONFIG = {
+  restUrl:  'https://rest21.bullhornstaffing.com/rest-services/7pklds',
+  swimlane: 'rest21',
+  corpId:   '21592',
+  // Fields to fetch on ClientCorporation
+  corpFields: 'id,name,owner,clientCorporationId,address,phone,fax,website,status,type,annualRevenue,numEmployees',
+  // Fields to fetch on Placement (active contracts)
+  placementFields: 'id,candidate,jobOrder,startDate,endDate,status,employmentType,salary,clientBillRate,customText1',
+  // Fields to fetch on JobOrder
+  jobFields: 'id,title,status,employmentType,numOpenings,submissions,isOpen,dateAdded,owner,categories',
+  // Max records per entity query
+  maxResults: 200,
+};
+
+/* ─────────────────────────────────────────────
+   MOCK DATA (shown when AppBridge unavailable)
+───────────────────────────────────────────── */
+const MOCK = {
+  demo: true,
+  corp: { id: 999, name: 'Barclays UK', owner: { firstName: 'Sarah', lastName: 'Holt' }, type: 'Client', status: 'Active' },
+  revenue: { permFees: 214000, contractGP: 98000, totalGP: 312000, target: 380000, lyGP: 273000, lyPerm: 181000, lyCont: 92000 },
+  pipeline: {
+    openJobs: 11, openPerm: 4, openContract: 7,
+    submissions: 34, interviews: 8, offersOut: 3, staleOffers: 3,
+    byPractice: [
+      { name: 'Technology',        value: 148000 },
+      { name: 'Risk & Compliance', value: 78000  },
+      { name: 'Finance',           value: 43000  },
+      { name: 'Operations',        value: 21000  },
+    ]
+  },
+  contractors: [
+    { name: 'J. Patel',   role: 'DevSecOps',   end: '31 Jul 25', status: 'Extending'  },
+    { name: 'L. Okafor',  role: 'BA',           end: '14 Jun 25', status: 'Finishing'  },
+    { name: 'M. Chen',    role: 'PM',           end: '30 Sep 25', status: 'May Extend' },
+    { name: 'A. Singh',   role: 'Data Eng.',    end: '31 Aug 25', status: 'Unknown'    },
+    { name: 'P. Nwosu',   role: 'QA Engineer',  end: '15 Oct 25', status: 'Extending'  },
+  ],
+  permPlacements: [
+    { consultant: 'S. Holt',  count: 6, avgFee: 28000 },
+    { consultant: 'D. Mbeki', count: 4, avgFee: 24000  },
+    { consultant: 'R. Torres',count: 3, avgFee: 31000  },
+    { consultant: 'Others',   count: 3, avgFee: 19000  },
+  ],
+  relationship: { callsThisMonth: 7, nps: 8.4, contacts: 5, lastContact: '3 days ago', tier: 'Strategic' },
+  submissionsTrend: [2,5,9,14,18,22,26,29,32,34],
+};
+
+/* ─────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────── */
+function fmt(n)   { return '£' + (n >= 1000 ? (n/1000).toFixed(0) + 'k' : n.toLocaleString()); }
+function pct(a,b) { if (!b) return '—'; return ((a-b)/b*100).toFixed(0) + '%'; }
+function sign(n)  { return n >= 0 ? '↑ ' : '↓ '; }
+function contractorStatusPill(s) {
+  const map = {
+    'Finishing':   'pill-red',
+    'Extending':   'pill-amber',
+    'May Extend':  'pill-green',
+    'Not Extending':'pill-red',
+    'Finished':    'pill-gray',
+    'Unknown':     'pill-gray',
+  };
+  return `<span class="pill ${map[s] || 'pill-gray'}">${s}</span>`;
+}
+function tierPill(t) {
+  const map = { 'Strategic': 'pill-blue', 'Key': 'pill-green', 'Growth': 'pill-amber', 'Standard': 'pill-gray' };
+  return `<span class="pill ${map[t] || 'pill-gray'}">${t}</span>`;
+}
+
+/* ─────────────────────────────────────────────
+   API FETCH
+───────────────────────────────────────────── */
+async function apiFetch(token, path) {
+  const url = `${CONFIG.restUrl}/${path}${path.includes('?') ? '&' : '?'}BhRestToken=${token}&count=${CONFIG.maxResults}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`API error ${r.status}: ${path}`);
+  return r.json();
+}
+
+async function loadData(token, entityId) {
+  // Parallel fetch: company, placements, jobs, notes, contacts
+  const [corpRes, placRes, jobRes, noteRes, contactRes] = await Promise.allSettled([
+    apiFetch(token, `entity/ClientCorporation/${entityId}?fields=${CONFIG.corpFields}`),
+    apiFetch(token, `search/Placement?query=clientCorporation.id:${entityId} AND status:"Active"&fields=${CONFIG.placementFields}`),
+    apiFetch(token, `search/JobOrder?query=clientCorporation.id:${entityId} AND isOpen:true&fields=${CONFIG.jobFields}`),
+    apiFetch(token, `search/Note?query=clientCorporation.id:${entityId}&fields=id,dateAdded,action,commentingPerson&sort=-dateAdded&count=50`),
+    apiFetch(token, `search/ClientContact?query=clientCorporation.id:${entityId}&fields=id,firstName,lastName,title,email&count=100`),
+  ]);
+
+  const corp      = corpRes.status === 'fulfilled'    ? corpRes.value.data    : null;
+  const placements= placRes.status === 'fulfilled'    ? placRes.value.data    : [];
+  const jobs      = jobRes.status === 'fulfilled'     ? jobRes.value.data     : [];
+  const notes     = noteRes.status === 'fulfilled'    ? noteRes.value.data    : [];
+  const contacts  = contactRes.status === 'fulfilled' ? contactRes.value.data : [];
+
+  if (!corp) throw new Error('Could not load company record');
+
+  // Revenue: sum fee fields on completed placements (extend as needed for your field names)
+  const completedPlacements = placements.filter(p => p.status === 'Placed' || p.employmentType === 'Permanent');
+  const permFees   = completedPlacements.filter(p => p.employmentType === 'Permanent').reduce((s,p) => s + (p.salary || 0), 0);
+  const contractGP = placements.filter(p => p.employmentType !== 'Permanent').reduce((s,p) => s + (p.clientBillRate || 0), 0);
+  const totalGP    = permFees + contractGP;
+
+  // Active contractors with end dates
+  const contractors = placements
+    .filter(p => p.employmentType !== 'Permanent')
+    .map(p => ({
+      name:   p.candidate ? `${p.candidate.firstName || ''} ${p.candidate.lastName || ''}`.trim() : '—',
+      role:   p.jobOrder  ? p.jobOrder.title : '—',
+      end:    p.endDate   ? new Date(p.endDate).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'2-digit'}) : '—',
+      status: p.customText1 || 'Unknown',
+    }));
+
+  // Pipeline counts
+  const openPerm     = jobs.filter(j => j.employmentType === 'Permanent').length;
+  const openContract = jobs.filter(j => j.employmentType !== 'Permanent').length;
+  const submissions  = jobs.reduce((s,j) => s + (j.submissions || 0), 0);
+
+  // Notes: calls this month
+  const thisMonth = new Date(); thisMonth.setDate(1); thisMonth.setHours(0,0,0,0);
+  const callsThisMonth = notes.filter(n => new Date(n.dateAdded) >= thisMonth && (n.action||'').toLowerCase().includes('call')).length;
+  const lastContactMs  = notes.length ? Math.max(...notes.map(n => n.dateAdded)) : null;
+  const daysSince      = lastContactMs ? Math.round((Date.now() - lastContactMs) / 86400000) : null;
+
+  return {
+    demo: false,
+    corp,
+    revenue: { permFees, contractGP, totalGP, target: 0, lyGP: 0, lyPerm: 0, lyCont: 0 },
+    pipeline: { openJobs: jobs.length, openPerm, openContract, submissions, interviews: 0, offersOut: 0, staleOffers: 0, byPractice: [] },
+    contractors,
+    permPlacements: [],
+    relationship: {
+      callsThisMonth,
+      nps: null,
+      contacts: contacts.length,
+      lastContact: daysSince !== null ? `${daysSince} day${daysSince === 1 ? '' : 's'} ago` : '—',
+      tier: 'Standard',
+    },
+    submissionsTrend: [],
+  };
+}
+
+/* ─────────────────────────────────────────────
+   FLAGS (rule-based)
+───────────────────────────────────────────── */
+function buildFlags(d) {
+  const flags = [];
+  const now = new Date();
+  // Contractors finishing soon with no replacement
+  d.contractors.forEach(c => {
+    if (c.status === 'Finishing') {
+      flags.push({ type: 'red', msg: `${c.name} contract ending ${c.end} — no extension or replacement job raised` });
+    }
+  });
+  // Stale offers
+  if (d.pipeline.staleOffers > 0) {
+    flags.push({ type: 'amber', msg: `${d.pipeline.staleOffers} offer${d.pipeline.staleOffers > 1 ? 's' : ''} pending >5 days — decision chasing recommended` });
+  }
+  // Target gap
+  if (d.revenue.target > 0) {
+    const gap = d.revenue.target - d.revenue.totalGP;
+    const vsTarget = Math.round(d.revenue.totalGP / d.revenue.target * 100);
+    if (vsTarget < 90) {
+      flags.push({ type: 'amber', msg: `${vsTarget}% of annual target — ${fmt(gap)} needed to close gap` });
+    }
+  }
+  // No recent contact
+  if (d.relationship.callsThisMonth === 0) {
+    flags.push({ type: 'blue', msg: 'No calls logged this month — consider scheduling an account touchpoint' });
+  }
+  return flags;
+}
+
+/* ─────────────────────────────────────────────
+   RENDER
+───────────────────────────────────────────── */
+function render(d) {
+  const flags = buildFlags(d);
+  const owner  = d.corp.owner ? `${d.corp.owner.firstName} ${d.corp.owner.lastName}` : '—';
+  const byPractice = d.pipeline.byPractice;
+  const maxPractice = byPractice.length ? Math.max(...byPractice.map(p => p.value)) : 1;
+
+  const vsTarget  = d.revenue.target > 0 ? Math.round(d.revenue.totalGP / d.revenue.target * 100) : null;
+  const gpDiff    = d.revenue.totalGP - d.revenue.lyGP;
+  const permDiff  = d.revenue.permFees - d.revenue.lyPerm;
+  const contDiff  = d.revenue.contractGP - d.revenue.lyCont;
+
+  const html = `
+    ${d.demo ? '<div class="demo-banner">⚡ Demo mode — sample data shown. Connect via AppBridge for live data.</div>' : ''}
+
+    <div class="acct-header">
+      <div>
+        <div class="acct-name">${d.corp.name}</div>
+        <div class="acct-meta">
+          <span>Owner: <strong>${owner}</strong></span>
+          <span class="sep">·</span>
+          <span>${d.corp.type || 'Client'}</span>
+          <span class="sep">·</span>
+          <span>Tier: ${tierPill(d.relationship.tier)}</span>
+        </div>
+      </div>
+      <div class="last-contact">
+        <div class="lc-label">Last contact</div>
+        <div class="lc-value">${d.relationship.lastContact}</div>
+      </div>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="section">
+      <div class="section-title">Revenue snapshot <span>YTD · FY ${new Date().getFullYear()}</span></div>
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-label">Perm fees</div>
+          <div class="metric-value">${fmt(d.revenue.permFees)}</div>
+          ${d.revenue.lyPerm ? `<div class="metric-sub ${permDiff >= 0 ? 'up' : 'down'}">${sign(permDiff)}${Math.abs(+pct(d.revenue.permFees,d.revenue.lyPerm))}% vs LY</div>` : '<div class="metric-sub">—</div>'}
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Contract GP</div>
+          <div class="metric-value">${fmt(d.revenue.contractGP)}</div>
+          ${d.revenue.lyCont ? `<div class="metric-sub ${contDiff >= 0 ? 'up' : 'down'}">${sign(contDiff)}${Math.abs(+pct(d.revenue.contractGP,d.revenue.lyCont))}% vs LY</div>` : '<div class="metric-sub">—</div>'}
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Total GP</div>
+          <div class="metric-value">${fmt(d.revenue.totalGP)}</div>
+          ${d.revenue.lyGP ? `<div class="metric-sub ${gpDiff >= 0 ? 'up' : 'down'}">${sign(gpDiff)}${Math.abs(+pct(d.revenue.totalGP,d.revenue.lyGP))}% vs LY</div>` : '<div class="metric-sub">—</div>'}
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">vs target</div>
+          <div class="metric-value ${vsTarget === null ? '' : vsTarget >= 90 ? '' : vsTarget >= 70 ? 'amber' : 'red'}">
+            ${vsTarget !== null ? vsTarget + '%' : '—'}
+          </div>
+          ${d.revenue.target > 0 ? `<div class="metric-sub warn">${fmt(Math.max(0, d.revenue.target - d.revenue.totalGP))} to go</div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="section">
+      <div class="section-title">Pipeline <span>Open jobs &amp; submissions</span></div>
+      <div class="metric-grid cols-3" style="margin-bottom:12px;">
+        <div class="metric-card">
+          <div class="metric-label">Open jobs</div>
+          <div class="metric-value">${d.pipeline.openJobs}</div>
+          <div class="metric-sub">${d.pipeline.openPerm} perm · ${d.pipeline.openContract} contract</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Submissions</div>
+          <div class="metric-value">${d.pipeline.submissions}</div>
+          <div class="metric-sub">${d.pipeline.interviews} at interview</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Offers out</div>
+          <div class="metric-value ${d.pipeline.staleOffers > 0 ? 'amber' : ''}">${d.pipeline.offersOut}</div>
+          ${d.pipeline.staleOffers > 0 ? `<div class="metric-sub warn">${d.pipeline.staleOffers} pending &gt;5 days</div>` : '<div class="metric-sub">—</div>'}
+        </div>
+      </div>
+
+      ${byPractice.length ? `
+      <div class="bar-section">
+        <div class="bar-label">Pipeline value by practice</div>
+        ${byPractice.map(p => `
+          <div class="bar-row">
+            <div class="bar-name">${p.name}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(p.value/maxPractice*100)}%"></div></div>
+            <div class="bar-val">${fmt(p.value)}</div>
+          </div>`).join('')}
+      </div>` : ''}
+
+      ${d.submissionsTrend.length ? `
+      <div class="chart-wrap">
+        <canvas id="trendChart"></canvas>
+      </div>` : ''}
+    </div>
+
+    <!-- CONTRACTORS + PERM -->
+    <div class="section">
+      <div class="section-title">Contractors &amp; placements</div>
+      <div class="two-col">
+        <div class="two-col-panel">
+          <div class="panel-head">Contractors on-site (${d.contractors.length})</div>
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Role</th><th>End</th><th>Status</th></tr></thead>
+            <tbody>
+              ${d.contractors.length ? d.contractors.map(c => `
+                <tr>
+                  <td>${c.name}</td>
+                  <td class="muted">${c.role}</td>
+                  <td class="muted">${c.end}</td>
+                  <td>${contractorStatusPill(c.status)}</td>
+                </tr>`).join('') : '<tr><td colspan="4" class="muted" style="text-align:center;padding:12px;">No active contractors</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <div class="two-col-panel">
+          <div class="panel-head">Perm placements YTD</div>
+          <table class="data-table">
+            <thead><tr><th>Consultant</th><th>Count</th><th>Avg fee</th></tr></thead>
+            <tbody>
+              ${d.permPlacements.length ? d.permPlacements.map(p => `
+                <tr>
+                  <td>${p.consultant}</td>
+                  <td>${p.count}</td>
+                  <td class="muted">${fmt(p.avgFee)}</td>
+                </tr>`).join('') : '<tr><td colspan="3" class="muted" style="text-align:center;padding:12px;">No data</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCOUNT HEALTH -->
+    <div class="section">
+      <div class="section-title">Account health</div>
+      ${flags.length ? `
+      <div class="flags">
+        ${flags.map(f => `
+          <div class="flag flag-${f.type}">
+            <span class="flag-icon">${f.type === 'red' ? '⚠' : f.type === 'amber' ? '⏱' : 'ℹ'}</span>
+            <span>${f.msg}</span>
+          </div>`).join('')}
+      </div>` : `<div class="flag flag-blue"><span class="flag-icon">✓</span><span>No issues flagged for this account</span></div>`}
+
+      <hr class="divider">
+      <div class="metric-grid cols-3">
+        <div class="metric-card">
+          <div class="metric-label">Calls this month</div>
+          <div class="metric-value">${d.relationship.callsThisMonth}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">NPS (last survey)</div>
+          <div class="metric-value ${d.relationship.nps ? (d.relationship.nps >= 8 ? '' : d.relationship.nps >= 6 ? 'amber' : 'red') : ''}">${d.relationship.nps !== null ? d.relationship.nps : '—'}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Hiring manager contacts</div>
+          <div class="metric-value">${d.relationship.contacts}</div>
+          <div class="metric-sub">on record</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('root').innerHTML = html;
+
+  // Render submissions trend chart if data present
+  if (d.submissionsTrend.length) {
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: d.submissionsTrend.map((_,i) => `W${i+1}`),
+        datasets: [{
+          label: 'Submissions',
+          data: d.submissionsTrend,
+          borderColor: '#0d6dcd',
+          backgroundColor: 'rgba(13,109,205,0.08)',
+          pointBackgroundColor: '#0d6dcd',
+          pointRadius: 3,
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10, family: "'Source Sans 3', sans-serif" }, color: '#94a3b8' } },
+          y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10, family: "'Source Sans 3', sans-serif" }, color: '#94a3b8', stepSize: 5 } },
+        }
+      }
+    });
+  }
+}
+
+/* ─────────────────────────────────────────────
+   BOOT — AppBridge handshake
+───────────────────────────────────────────── */
+(async () => {
+  try {
+    // Try AppBridge
+    const appResponse = await postRobot.send(window.parent, 'getAppContext', {}, { timeout: 5000 });
+    const { BhRestToken, restUrl, entityId } = appResponse.data;
+    const baseUrl = (restUrl || CONFIG.restUrl).replace(/\/$/, '');
+    CONFIG.restUrl = baseUrl;
+    const data = await loadData(BhRestToken, entityId);
+    render(data);
+  } catch (appErr) {
+    // No AppBridge — try URL params (e.g. ?EntityID=123)
+    const params = new URLSearchParams(window.location.search);
+    const entityId = params.get('EntityID') || params.get('entityId');
+    if (entityId) {
+      try {
+        // Auth token from URL (Partner API flow) if available
+        const token = params.get('BhRestToken') || params.get('token');
+        if (token) {
+          const data = await loadData(token, entityId);
+          render(data);
+          return;
+        }
+      } catch (e) { /* fall through to demo */ }
+    }
+    // Demo mode fallback
+    render(MOCK);
+  }
+})();
+</script>
+</body>
+</html>
