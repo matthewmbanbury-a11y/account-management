@@ -314,8 +314,8 @@
   }
 
   async function fetchCorp(id) {
-    // 'type' is not a valid ClientCorporation field — use 'clientCorporationType' or omit
-    const fields = 'id,name,status,clientCorporationType,owner(id,firstName,lastName),address(city,countryName),phone,numEmployees,annualRevenue';
+    // Safe minimal fields — discover extras via meta if needed
+    const fields = 'id,name,status,owner(id,firstName,lastName),address(city,countryName),phone,numEmployees';
     const res = await bhGet(`entity/ClientCorporation/${id}?fields=${fields}&meta=off`);
     return res.data || res;
   }
@@ -323,7 +323,7 @@
   async function fetchJobs(corpId) {
     return bhSearch(
       'JobOrder',
-      `clientCorporation.id:${corpId} AND isDeleted:false AND isOpen:true`,
+      `clientCorporationID:${corpId} AND isDeleted:false AND isOpen:true`,
       'id,title,status,employmentType,numOpenings,dateAdded,owner(id,firstName,lastName),categories(name)',
       200, '-dateAdded'
     );
@@ -351,9 +351,10 @@
 
   async function fetchPlacements(corpId) {
     const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
+    // clientCorporationID is the flat indexed integer field on Placement
     return bhSearch(
       'Placement',
-      `clientCorporation.id:${corpId} AND isDeleted:false AND dateAdded:[${yearStart} TO *]`,
+      `clientCorporationID:${corpId} AND isDeleted:false AND dateAdded:[${yearStart} TO *]`,
       'id,status,dateAdded,startDate,endDate,employmentType,fee,flatFee,salary,clientBillRate,hoursPerWeek,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName),customText1',
       200, '-dateAdded'
     );
@@ -362,25 +363,23 @@
   async function fetchAllPlacements(corpId) {
     return bhSearch(
       'Placement',
-      `clientCorporation.id:${corpId} AND isDeleted:false`,
+      `clientCorporationID:${corpId} AND isDeleted:false`,
       'id,status',
       500
     );
   }
 
   async function fetchNotes(corpId) {
-    return bhSearch(
-      'Note',
-      `clientCorporation.id:${corpId} AND isDeleted:false`,
-      'id,dateAdded,action,commentingPerson(id,firstName,lastName)',
-      100, '-dateAdded'
-    );
+    // allCorpNotes is the dedicated endpoint for company-level notes
+    const res = await bhGet(`allCorpNotes?clientCorpId=${corpId}&fields=id,dateAdded,action,commentingPerson(id,firstName,lastName)&count=100&start=0&sort=-dateAdded&meta=off`);
+    return res.data || [];
   }
 
   async function fetchContacts(corpId) {
+    // clientCorporationID is the flat indexed field; quote string values in Lucene
     return bhSearch(
       'ClientContact',
-      `clientCorporation.id:${corpId} AND isDeleted:false AND status:Active`,
+      `clientCorporationID:${corpId} AND isDeleted:false AND status:"Active"`,
       'id,firstName,lastName,title,email',
       200
     );
@@ -389,7 +388,7 @@
   async function fetchAllJobs(corpId) {
     return bhSearch(
       'JobOrder',
-      `clientCorporation.id:${corpId} AND isDeleted:false`,
+      `clientCorporationID:${corpId} AND isDeleted:false`,
       'id,status',
       500
     );
