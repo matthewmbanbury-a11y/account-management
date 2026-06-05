@@ -91,7 +91,7 @@
     const entityId = parseInt(getParam('EntityID'), 10);
     try {
       // All three use confirmed working patterns
-      const [jobs, placements, notesRes] = await Promise.all([
+      const [jobs, notesRes] = await Promise.all([
 
         // 1. Open jobs — confirmed working
         bhPost('search/JobOrder', {
@@ -100,17 +100,11 @@
           count: 200, start: 0, sort: '-dateAdded'
         }),
 
-        // 2. Placements — same POST pattern, filter by company
-        bhPost('search/Placement', {
-          query: `clientCorporation.id:${entityId} AND isDeleted:false`,
-          fields: 'id,status,employmentType,dateAdded,endDate,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName),customText1',
-          count: 200, start: 0, sort: '-dateAdded'
-        }),
-
-        // 3. Notes — dedicated endpoint, bhGet shape
+        // 2. Notes — confirmed working
         bhGet(`allCorpNotes?clientCorpId=${entityId}&fields=id,dateAdded,action,commentingPerson(id,firstName,lastName),comments&count=5&start=0&sort=-dateAdded`),
 
       ]);
+      const placements = [];
 
       render(entityId, jobs, placements, notesRes);
     } catch(err) {
@@ -234,7 +228,7 @@
 
     show(`
       <div class="header">
-        <div><div class="header-title">Account Management</div><div class="header-sub">MoneyCorp · ${jobs.length} open jobs · ${active.length} contractors</div></div>
+        <div><div class="header-title">Account Management</div><div class="header-sub">${jobs.length} open job${jobs.length!==1?"s":""} · ${active.length} contractors</div></div>
         <div class="badges">
           ${jobs.length ? `<span class="badge badge-blue">${jobs.length} open</span>` : ''}
           ${atRisk ? `<span class="badge badge-yellow">${atRisk} at risk</span>` : ''}
