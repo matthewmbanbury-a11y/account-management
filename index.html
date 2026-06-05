@@ -5,286 +5,152 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Account Management</title>
   <script src="//cdn.rawgit.com/krakenjs/post-robot/7da06445/dist/post-robot.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --font: 'Source Sans 3', 'Source Sans Pro', sans-serif;
-      --blue: #0d6dcd;
-      --blue-light: #e8f1fb;
-      --green: #1a7f4b;
-      --green-light: #e6f4ed;
-      --amber: #a35c00;
-      --amber-light: #fef3e2;
-      --red: #b91c1c;
-      --red-light: #fef2f2;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --muted: #64748b;
-      --bg: #ffffff;
-      --surface: #f8fafc;
-      --radius: 6px;
+      --blue: #0d6dcd; --blue-bg: #e8f1fb;
+      --green: #1a7f4b; --green-bg: #e6f4ed;
+      --amber: #a35c00; --amber-bg: #fef3e2;
+      --red: #b91c1c; --red-bg: #fef2f2;
+      --border: #e2e8f0; --text: #1e293b; --muted: #64748b;
+      --bg: #ffffff; --surface: #f8fafc; --radius: 6px;
     }
-    html, body { font-family: var(--font); font-size: 13px; color: var(--text); background: var(--bg); line-height: 1.5; }
-    body { display: flex; flex-direction: column; min-height: 100vh; }
+    body { font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif; font-size: 13px; color: var(--text); background: var(--bg); }
 
-    /* ── State screens ── */
-    .state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; min-height: 160px; }
-    .state-msg { font-size: 12px; color: var(--muted); text-align: center; max-width: 260px; line-height: 1.6; }
+    /* States */
+    .state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px 20px; min-height: 180px; }
     .state-title { font-size: 13px; font-weight: 600; }
-    .spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.75s linear infinite; }
+    .state-msg { font-size: 12px; color: var(--muted); text-align: center; max-width: 280px; line-height: 1.6; }
+    .spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .75s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .retry-btn { margin-top: 4px; padding: 5px 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: inherit; font-size: 11px; border-radius: var(--radius); cursor: pointer; }
+    .retry-btn { padding: 5px 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: inherit; font-size: 11px; border-radius: var(--radius); cursor: pointer; }
     .retry-btn:hover { border-color: var(--blue); color: var(--blue); }
     .hidden { display: none !important; }
 
-    /* ── Layout ── */
-    #card { display: none; flex-direction: column; }
-    #card.visible { display: flex; }
+    /* Card */
+    #card { display: none; }
+    #card.visible { display: block; }
 
-    /* ── Header ── */
-    .acct-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px 14px 10px; border-bottom: 1px solid var(--border); gap: 10px; }
-    .acct-name { font-size: 14px; font-weight: 600; }
-    .acct-meta { font-size: 12px; color: var(--muted); margin-top: 2px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
-    .last-contact { text-align: right; flex-shrink: 0; }
-    .lc-label { font-size: 11px; color: var(--muted); }
-    .lc-value { font-size: 13px; font-weight: 500; margin-top: 1px; }
+    /* Header */
+    .hdr { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 14px 10px; border-bottom: 1px solid var(--border); }
+    .hdr-name { font-size: 14px; font-weight: 600; }
+    .hdr-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .hdr-right { text-align: right; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+    .hdr-right strong { display: block; font-size: 13px; font-weight: 500; color: var(--text); }
 
-    /* ── Pills ── */
-    .pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 20px; line-height: 1.6; }
-    .pill-blue   { background: var(--blue-light);  color: var(--blue);  }
-    .pill-green  { background: var(--green-light); color: var(--green); }
-    .pill-amber  { background: var(--amber-light); color: var(--amber); }
-    .pill-red    { background: var(--red-light);   color: var(--red);   }
-    .pill-gray   { background: var(--surface);     color: var(--muted); border: 1px solid var(--border); }
+    /* Section */
+    .sec { padding: 12px 14px 14px; }
+    .sec + .sec { border-top: 1px solid var(--border); }
+    .sec-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 10px; }
 
-    /* ── Sections ── */
-    .section { padding: 12px 14px 0; }
-    .section + .section { border-top: 1px solid var(--border); margin-top: 10px; }
-    .section:last-child { padding-bottom: 16px; }
-    .section-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 9px; display: flex; justify-content: space-between; align-items: center; }
-    .section-title span { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; }
+    /* Metric grid */
+    .metrics { display: grid; gap: 8px; }
+    .m3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .m4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
+    .metric-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+    .metric-value { font-size: 20px; font-weight: 600; line-height: 1.1; }
+    .metric-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .c-amber { color: var(--amber); }
+    .c-red   { color: var(--red);   }
+    .c-green { color: var(--green); }
 
-    /* ── Metric grid ── */
-    .metric-grid { display: grid; gap: 8px; margin-bottom: 4px; }
-    .metric-grid.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
-    .metric-grid.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
-    .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
-    .metric-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .metric-value { font-size: 19px; font-weight: 600; line-height: 1.1; }
-    .metric-value.amber { color: var(--amber); }
-    .metric-value.red   { color: var(--red);   }
-    .metric-value.green { color: var(--green); }
-    .metric-sub { font-size: 11px; margin-top: 2px; color: var(--muted); }
-    .metric-sub.up   { color: var(--green); }
-    .metric-sub.down { color: var(--red);   }
-    .metric-sub.warn { color: var(--amber); }
+    /* Jobs table */
+    .tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+    .tbl th { font-size: 10px; font-weight: 600; color: var(--muted); text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .tbl td { padding: 6px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl td.muted { color: var(--muted); }
+    .tbl td.num { text-align: right; font-weight: 500; }
 
-    /* ── Bar chart ── */
-    .bar-section { margin-top: 10px; }
-    .bar-label { font-size: 11px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+    /* Pills */
+    .pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 20px; line-height: 1.6; white-space: nowrap; }
+    .p-green { background: var(--green-bg); color: var(--green); }
+    .p-amber { background: var(--amber-bg); color: var(--amber); }
+    .p-red   { background: var(--red-bg);   color: var(--red);   }
+    .p-blue  { background: var(--blue-bg);  color: var(--blue);  }
+    .p-gray  { background: var(--surface);  color: var(--muted); border: 1px solid var(--border); }
+
+    /* Bar */
     .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-    .bar-name { font-size: 12px; color: var(--muted); width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-name { font-size: 12px; color: var(--muted); width: 130px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .bar-track { flex: 1; background: var(--border); border-radius: 3px; height: 7px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 3px; background: var(--blue); }
-    .bar-val { font-size: 12px; font-weight: 500; width: 44px; text-align: right; flex-shrink: 0; color: var(--blue); }
+    .bar-val { font-size: 12px; font-weight: 500; width: 32px; text-align: right; color: var(--muted); flex-shrink: 0; }
 
-    /* ── Two-col ── */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0; }
-    .panel { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    .panel-head { padding: 6px 10px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .data-table th { font-size: 10px; font-weight: 600; color: var(--muted); text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); }
-    .data-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table td.muted { color: var(--muted); }
-    .empty-row { text-align: center; color: var(--muted); padding: 12px 8px !important; }
-
-    /* ── Flags ── */
-    .flags { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-    .flag { display: flex; align-items: flex-start; gap: 8px; padding: 6px 9px; border-radius: var(--radius); font-size: 12px; line-height: 1.4; }
-    .flag-icon { flex-shrink: 0; margin-top: 1px; }
-    .flag-red   { background: var(--red-light);   color: #7f1d1d; border-left: 3px solid var(--red);   }
-    .flag-amber { background: var(--amber-light);  color: #78350f; border-left: 3px solid var(--amber); }
-    .flag-green { background: var(--green-light); color: #14532d; border-left: 3px solid var(--green); }
-    .flag-blue  { background: var(--blue-light);   color: #1e40af; border-left: 3px solid var(--blue);  }
-
-    /* ── Divider ── */
-    .divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+    /* Flag */
+    .flag { display: flex; gap: 8px; padding: 6px 9px; border-radius: var(--radius); font-size: 12px; line-height: 1.4; margin-bottom: 6px; }
+    .flag:last-child { margin-bottom: 0; }
+    .f-red   { background: var(--red-bg);   color: #7f1d1d; border-left: 3px solid var(--red);   }
+    .f-amber { background: var(--amber-bg); color: #78350f; border-left: 3px solid var(--amber); }
+    .f-green { background: var(--green-bg); color: #14532d; border-left: 3px solid var(--green); }
   </style>
 </head>
 <body>
 
-  <div class="state" id="stateLoading">
-    <div class="spinner"></div>
-    <div class="state-msg">Loading account data…</div>
+<div class="state" id="stateLoading"><div class="spinner"></div><div class="state-msg">Loading…</div></div>
+<div class="state hidden" id="stateNoConn"><div class="state-title">Not connected</div><div class="state-msg">Open this card from a Client Corporation record.</div></div>
+<div class="state hidden" id="stateError"><div class="state-title">Error</div><div class="state-msg" id="errMsg"></div><button class="retry-btn" onclick="init()">Retry</button></div>
+
+<div id="card">
+  <div class="hdr">
+    <div>
+      <div class="hdr-name" id="corpName">—</div>
+      <div class="hdr-meta" id="corpMeta">—</div>
+    </div>
+    <div class="hdr-right">Open jobs<strong id="hdrJobCount">—</strong></div>
   </div>
 
-  <div class="state hidden" id="stateNoConn">
-    <div class="state-title">Not connected</div>
-    <div class="state-msg">Open this card from a Client Corporation record in Bullhorn.</div>
-  </div>
-
-  <div class="state hidden" id="stateError">
-    <div class="state-title">Could not load data</div>
-    <div class="state-msg" id="errMsg"></div>
-    <button class="retry-btn" onclick="init()">Retry</button>
-  </div>
-
-  <div id="card">
-    <!-- Header -->
-    <div class="acct-header">
-      <div>
-        <div class="acct-name" id="corpName">—</div>
-        <div class="acct-meta" id="corpMeta"></div>
-      </div>
-      <div class="last-contact">
-        <div class="lc-label">Last activity</div>
-        <div class="lc-value" id="lastContact">—</div>
-      </div>
-    </div>
-
-    <!-- Revenue -->
-    <div class="section" id="secRevenue">
-      <div class="section-title">Revenue snapshot <span id="revYear"></span></div>
-      <div class="metric-grid cols-4">
-        <div class="metric-card">
-          <div class="metric-label">Perm fees</div>
-          <div class="metric-value" id="mPermFees">—</div>
-          <div class="metric-sub" id="mPermSub"></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Contract GP</div>
-          <div class="metric-value" id="mContractGP">—</div>
-          <div class="metric-sub" id="mContractSub"></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Total GP</div>
-          <div class="metric-value" id="mTotalGP">—</div>
-          <div class="metric-sub" id="mTotalSub"></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Placements YTD</div>
-          <div class="metric-value" id="mPlacCount">—</div>
-          <div class="metric-sub" id="mPlacSub"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pipeline -->
-    <div class="section">
-      <div class="section-title">Pipeline <span>Open jobs &amp; submissions</span></div>
-      <div class="metric-grid cols-3" style="margin-bottom:12px;">
-        <div class="metric-card">
-          <div class="metric-label">Open jobs</div>
-          <div class="metric-value" id="mOpenJobs">—</div>
-          <div class="metric-sub" id="mOpenJobsSub"></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Submissions</div>
-          <div class="metric-value" id="mSubs">—</div>
-          <div class="metric-sub" id="mSubsSub"></div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Interviews</div>
-          <div class="metric-value" id="mInterviews">—</div>
-          <div class="metric-sub" id="mInterviewsSub"></div>
-        </div>
-      </div>
-      <div class="bar-section" id="practiceSection" style="display:none;">
-        <div class="bar-label">Open jobs by category</div>
-        <div id="practiceBars"></div>
-      </div>
-    </div>
-
-    <!-- Contractors + Perm -->
-    <div class="section">
-      <div class="section-title">Contractors &amp; placements</div>
-      <div class="two-col">
-        <div class="panel">
-          <div class="panel-head">Active contractors (<span id="contractorCount">0</span>)</div>
-          <table class="data-table">
-            <thead><tr><th>Name</th><th>Role</th><th>End date</th><th>Status</th></tr></thead>
-            <tbody id="contractorRows"></tbody>
-          </table>
-        </div>
-        <div class="panel">
-          <div class="panel-head">Perm placements YTD</div>
-          <table class="data-table">
-            <thead><tr><th>Consultant</th><th>Count</th><th>Avg fee</th></tr></thead>
-            <tbody id="permRows"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Account health -->
-    <div class="section">
-      <div class="section-title">Account health</div>
-      <div class="flags" id="flags"></div>
-      <hr class="divider">
-      <div class="metric-grid cols-3">
-        <div class="metric-card">
-          <div class="metric-label">Notes this month</div>
-          <div class="metric-value" id="mNotes">—</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Total contacts</div>
-          <div class="metric-value" id="mContacts">—</div>
-          <div class="metric-sub">on record</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">All-time fill rate</div>
-          <div class="metric-value" id="mFillRate">—</div>
-          <div class="metric-sub" id="mFillRateSub"></div>
-        </div>
-      </div>
+  <!-- Pipeline summary -->
+  <div class="sec">
+    <div class="sec-title">Pipeline</div>
+    <div class="metrics m4">
+      <div class="metric"><div class="metric-label">Open jobs</div><div class="metric-value" id="mJobs">—</div><div class="metric-sub" id="mJobsSub"></div></div>
+      <div class="metric"><div class="metric-label">Submissions</div><div class="metric-value" id="mSubs">—</div><div class="metric-sub" id="mSubsSub"></div></div>
+      <div class="metric"><div class="metric-label">Interviews</div><div class="metric-value" id="mInterviews">—</div><div class="metric-sub">at interview stage</div></div>
+      <div class="metric"><div class="metric-label">Placements</div><div class="metric-value" id="mPlacs">—</div><div class="metric-sub" id="mPlacsSub"></div></div>
     </div>
   </div>
+
+  <!-- Jobs breakdown -->
+  <div class="sec">
+    <div class="sec-title">Open jobs breakdown</div>
+    <div id="typeBar"></div>
+    <table class="tbl">
+      <thead><tr><th>Job title</th><th>Owner</th><th>Type</th><th>Days open</th><th style="text-align:right">CVs</th><th style="text-align:right">Interviews</th><th>RAG</th></tr></thead>
+      <tbody id="jobRows"></tbody>
+    </table>
+  </div>
+
+  <!-- Account health flags -->
+  <div class="sec">
+    <div class="sec-title">Account health</div>
+    <div id="flags"></div>
+  </div>
+</div>
 
 <script>
-  // ── Helpers ──────────────────────────────────────────────────────
   const ONE_DAY = 86400000;
   const getParam = k => new URLSearchParams(location.search).get(k);
-  const daysSince = ts => Math.round((Date.now() - ts) / ONE_DAY);
+  const daysSince = ts => Math.max(0, Math.round((Date.now() - ts) / ONE_DAY));
   const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  function fmt(n) {
-    if (n == null || isNaN(n)) return '—';
-    if (n === 0) return '£0';
-    if (n >= 1000000) return '£' + (n/1000000).toFixed(1) + 'm';
-    if (n >= 1000) return '£' + Math.round(n/1000) + 'k';
-    return '£' + Math.round(n).toLocaleString();
-  }
-
-  function fmtDate(ts) {
-    if (!ts) return '—';
-    return new Date(ts).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'2-digit' });
-  }
-
-  function contractorPill(s) {
-    const map = { 'Finishing':'pill-red', 'Extending':'pill-amber', 'May Extend':'pill-green', 'Not Extending':'pill-red', 'Unknown':'pill-gray' };
-    return `<span class="pill ${map[s]||'pill-gray'}">${esc(s||'Unknown')}</span>`;
-  }
-
-  // ── AppBridge ────────────────────────────────────────────────────
+  // ── AppBridge ──────────────────────────────────────────────────────
   let regAttempts = 0;
-  const MAX_REG = 5;
 
   function register() {
     regAttempts++;
     postRobot.sendToParent('register', { title: 'Account Management' }, { timeout: 6000 })
       .then(() => onRegistered(true))
       .catch(() => {
-        if (regAttempts < MAX_REG) setTimeout(register, 600);
+        if (regAttempts < 5) setTimeout(register, 600);
         else onRegistered(false);
       });
   }
 
-  function bhGet(relativeURL) {
-    return postRobot.sendToParent('httpGET', { relativeURL }, { timeout: 20000 })
+  function bhGet(url) {
+    return postRobot.sendToParent('httpGET', { relativeURL: url }, { timeout: 20000 })
       .then(evt => {
         const p = evt.data;
         if (!p) throw new Error('Empty response');
@@ -293,8 +159,8 @@
       });
   }
 
-  function bhPost(relativeURL, body) {
-    return postRobot.sendToParent('httpPOST', { relativeURL, data: body }, { timeout: 20000 })
+  function bhPost(url, body) {
+    return postRobot.sendToParent('httpPOST', { relativeURL: url, data: body }, { timeout: 20000 })
       .then(evt => {
         const p = evt.data;
         if (!p) throw new Error('Empty response');
@@ -303,315 +169,180 @@
       });
   }
 
-  // ── API calls ────────────────────────────────────────────────────
-  // search/* entities use GET with query params (not POST body)
-  function bhSearch(entity, query, fields, count, sort) {
-    const q   = encodeURIComponent(query);
-    const f   = encodeURIComponent(fields);
-    const s   = sort ? `&sort=${encodeURIComponent(sort)}` : '';
-    return bhGet(`search/${entity}?query=${q}&fields=${f}&count=${count||200}&start=0${s}&meta=off`)
-      .then(res => (res && res.data) ? res.data : (Array.isArray(res) ? res : []));
-  }
-
+  // ── API — only patterns confirmed working from the jobs card ──────
   async function fetchCorp(id) {
-    // Safe minimal fields — discover extras via meta if needed
-    const fields = 'id,name,status,owner(id,firstName,lastName),address(city,countryName),phone,numEmployees';
-    const res = await bhGet(`entity/ClientCorporation/${id}?fields=${fields}&meta=off`);
+    // Bare minimum fields only
+    const res = await bhGet(`entity/ClientCorporation/${id}?fields=id,name,owner(id,firstName,lastName)&meta=off`);
     return res.data || res;
   }
 
-  async function fetchJobs(corpId) {
-    return bhSearch(
-      'JobOrder',
-      `clientCorporationID:${corpId} AND isDeleted:false AND isOpen:true`,
-      'id,title,status,employmentType,numOpenings,dateAdded,owner(id,firstName,lastName),categories(name)',
-      200, '-dateAdded'
-    );
-  }
-
-  async function fetchSubmissions(corpId) {
-    // JobSubmission doesn't support nested clientCorporation query — get via open job IDs instead
-    // Fetch job IDs first, then query submissions by jobOrder.id
-    // (handled in onRegistered by passing jobs list)
-    return [];  // replaced below with fetchSubmissionsForJobs
-  }
-
-  async function fetchSubmissionsForJobs(jobIds) {
-    if (!jobIds.length) return [];
-    // Lucene OR query for job IDs — batch to avoid URL length issues
-    const batch = jobIds.slice(0, 50);
-    const idQuery = batch.map(id => `jobOrder.id:${id}`).join(' OR ');
-    return bhSearch(
-      'JobSubmission',
-      `(${idQuery}) AND isDeleted:false`,
-      'id,status,dateAdded,candidate(id,firstName,lastName),jobOrder(id,title)',
-      200, '-dateAdded'
-    );
-  }
-
-  async function fetchPlacements(corpId) {
-    const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
-    // clientCorporationID is the flat indexed integer field on Placement
-    return bhSearch(
-      'Placement',
-      `clientCorporationID:${corpId} AND isDeleted:false AND dateAdded:[${yearStart} TO *]`,
-      'id,status,dateAdded,startDate,endDate,employmentType,fee,flatFee,salary,clientBillRate,hoursPerWeek,candidate(id,firstName,lastName),jobOrder(id,title),owner(id,firstName,lastName),customText1',
-      200, '-dateAdded'
-    );
-  }
-
-  async function fetchAllPlacements(corpId) {
-    return bhSearch(
-      'Placement',
-      `clientCorporationID:${corpId} AND isDeleted:false`,
-      'id,status',
-      500
-    );
-  }
-
-  async function fetchNotes(corpId) {
-    // allCorpNotes is the dedicated endpoint for company-level notes
-    const res = await bhGet(`allCorpNotes?clientCorpId=${corpId}&fields=id,dateAdded,action,commentingPerson(id,firstName,lastName)&count=100&start=0&sort=-dateAdded&meta=off`);
+  async function fetchOpenJobs(corpId) {
+    // Confirmed working: search/JobOrder via httpPOST with nested submission/placement counts
+    const res = await bhPost('search/JobOrder', {
+      query: `clientCorporation.id:${corpId} AND isDeleted:false AND isOpen:true`,
+      fields: [
+        'id','title','status','employmentType','dateAdded',
+        'owner(id,firstName,lastName)',
+        'submissions[100](id,dateAdded,status)',
+        'placements[50](id,dateAdded,status)',
+        'categories(name)'
+      ].join(','),
+      count: 200,
+      start: 0,
+      sort: '-dateAdded'
+    });
     return res.data || [];
   }
 
-  async function fetchContacts(corpId) {
-    // clientCorporationID is the flat indexed field; quote string values in Lucene
-    return bhSearch(
-      'ClientContact',
-      `clientCorporationID:${corpId} AND isDeleted:false AND status:"Active"`,
-      'id,firstName,lastName,title,email',
-      200
-    );
-  }
-
   async function fetchAllJobs(corpId) {
-    return bhSearch(
-      'JobOrder',
-      `clientCorporationID:${corpId} AND isDeleted:false`,
-      'id,status',
-      500
-    );
+    // For fill rate — just IDs and placement count
+    const res = await bhPost('search/JobOrder', {
+      query: `clientCorporation.id:${corpId} AND isDeleted:false`,
+      fields: 'id,status,placements[1](id)',
+      count: 500,
+      start: 0
+    });
+    return res.data || [];
   }
 
-  // ── Analysis ─────────────────────────────────────────────────────
-  function analyse(corp, jobs, submissions, placements, allPlacements, notes, contacts, allJobs) {
+  // ── Analysis ──────────────────────────────────────────────────────
+  function analyse(corp, openJobs, allJobs) {
     const now = Date.now();
-    const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
 
-    // Revenue — try multiple fee fields in priority order
-    const permPlacs    = placements.filter(p => p.employmentType === 'Permanent' || p.employmentType === 'Direct Hire');
-    const contractPlacs= placements.filter(p => p.employmentType !== 'Permanent' && p.employmentType !== 'Direct Hire');
+    // Per-job metrics
+    const jobRows = openJobs.map(j => {
+      const subs = j.submissions?.data || [];
+      const placs = j.placements?.data || [];
+      const daysOpen = daysSince(j.dateAdded);
 
-    // Fee priority: fee > flatFee > salary (perm); clientBillRate * hoursPerWeek * weeks (contract)
-    const permFees = permPlacs.reduce((sum, p) => {
-      const v = p.fee || p.flatFee || p.salary || 0;
-      return sum + v;
-    }, 0);
+      const interviews = subs.filter(s => {
+        const st = (s.status||'').toLowerCase();
+        return st.includes('interview') || st.includes('1st') || st.includes('2nd') || st.includes('3rd') || st.includes('shortlist');
+      }).length;
 
-    const contractGP = contractPlacs.reduce((sum, p) => {
-      // clientBillRate is typically hourly; use as a proxy if no GP field
-      const v = p.fee || p.flatFee || 0;
-      return sum + v;
-    }, 0);
+      const daysSinceSub = subs.length
+        ? daysSince(Math.max(...subs.map(s => s.dateAdded)))
+        : daysOpen;
 
-    const totalGP = permFees + contractGP;
-
-    // Placements by consultant (perm YTD)
-    const byConsultant = {};
-    permPlacs.forEach(p => {
-      const name = p.owner ? `${p.owner.firstName} ${p.owner.lastName}` : 'Unknown';
-      if (!byConsultant[name]) byConsultant[name] = { count: 0, fees: 0 };
-      byConsultant[name].count++;
-      byConsultant[name].fees += (p.fee || p.flatFee || p.salary || 0);
-    });
-    const permByConsultant = Object.entries(byConsultant)
-      .map(([name, d]) => ({ name, count: d.count, avgFee: d.count ? Math.round(d.fees / d.count) : 0 }))
-      .sort((a,b) => b.count - a.count)
-      .slice(0, 6);
-
-    // Active contractors
-    const activeContractors = contractPlacs
-      .filter(p => p.status === 'Approved' || p.status === 'Active' || (p.endDate && p.endDate > now))
-      .map(p => ({
-        name:   p.candidate ? `${p.candidate.firstName} ${p.candidate.lastName}`.trim() : '—',
-        role:   p.jobOrder  ? p.jobOrder.title : '—',
-        end:    fmtDate(p.endDate),
-        endTs:  p.endDate || 0,
-        status: p.customText1 || deriveContractorStatus(p),
-      }))
-      .sort((a,b) => a.endTs - b.endTs);
-
-    function deriveContractorStatus(p) {
-      if (!p.endDate) return 'Unknown';
-      const daysLeft = Math.round((p.endDate - now) / ONE_DAY);
-      if (daysLeft < 0)  return 'Finishing';
-      if (daysLeft <= 30) return 'Finishing';
-      if (daysLeft <= 90) return 'Extending';
-      return 'May Extend';
-    }
-
-    // Pipeline
-    const openPerm     = jobs.filter(j => j.employmentType === 'Permanent' || j.employmentType === 'Direct Hire').length;
-    const openContract = jobs.filter(j => j.employmentType !== 'Permanent' && j.employmentType !== 'Direct Hire').length;
-
-    // Category breakdown of open jobs
-    const catMap = {};
-    jobs.forEach(j => {
-      const cats = j.categories?.data || [];
-      if (cats.length) {
-        cats.forEach(c => { catMap[c.name] = (catMap[c.name]||0) + 1; });
+      let rag, ragClass;
+      if (placs.length > 0) {
+        rag = 'Filled'; ragClass = 'p-blue';
+      } else if (daysOpen > 60 || (daysSinceSub > 14 && subs.length > 0)) {
+        rag = 'At risk'; ragClass = 'p-red';
+      } else if (daysOpen > 30 || daysSinceSub > 7) {
+        rag = 'Review'; ragClass = 'p-amber';
       } else {
-        catMap['Uncategorised'] = (catMap['Uncategorised']||0) + 1;
+        rag = 'On track'; ragClass = 'p-green';
       }
+
+      return {
+        id: j.id,
+        title: j.title || `Job #${j.id}`,
+        owner: j.owner ? `${j.owner.firstName} ${j.owner.lastName}` : '—',
+        type: j.employmentType || '—',
+        daysOpen,
+        subsCount: subs.length,
+        interviews,
+        placsCount: placs.length,
+        rag, ragClass,
+        categories: j.categories?.data || [],
+      };
     });
-    const byCategory = Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0,5);
 
-    // Submissions analysis
-    const totalSubs = submissions.length;
-    const interviews = submissions.filter(s => {
-      const st = (s.status||'').toLowerCase();
-      return st.includes('interview') || st.includes('1st') || st.includes('2nd') || st.includes('3rd');
-    }).length;
+    // Totals
+    const totalSubs      = jobRows.reduce((s,j) => s + j.subsCount, 0);
+    const totalInterviews= jobRows.reduce((s,j) => s + j.interviews, 0);
+    const totalPlacs     = jobRows.reduce((s,j) => s + j.placsCount, 0);
+    const openPerm       = jobRows.filter(j => (j.type||'').toLowerCase().includes('perm') || (j.type||'').toLowerCase().includes('direct')).length;
+    const openContract   = jobRows.length - openPerm;
 
-    // Notes
-    const thisMonthStart = new Date(); thisMonthStart.setDate(1); thisMonthStart.setHours(0,0,0,0);
-    const notesThisMonth = notes.filter(n => n.dateAdded >= thisMonthStart.getTime()).length;
-    const lastNoteTs = notes.length ? Math.max(...notes.map(n => n.dateAdded)) : null;
-    const lastActivity = lastNoteTs ? `${daysSince(lastNoteTs)} days ago` : '—';
+    // Type breakdown bars
+    const typeCounts = {};
+    jobRows.forEach(j => { typeCounts[j.type] = (typeCounts[j.type]||0) + 1; });
+    const typeBreakdown = Object.entries(typeCounts).sort((a,b) => b[1]-a[1]);
 
-    // Fill rate
-    const filledStatuses = ['Placed','Completed','Approved'];
+    // Fill rate (all-time)
     const totalJobCount  = allJobs.length;
-    const filledJobCount = allPlacements.filter(p => filledStatuses.includes(p.status)).length;
-    const fillRate = totalJobCount > 0 ? Math.round((filledJobCount / totalJobCount) * 100) : null;
+    const filledJobCount = allJobs.filter(j => (j.placements?.data||[]).length > 0).length;
+    const fillRate = totalJobCount > 0 ? Math.round(filledJobCount / totalJobCount * 100) : null;
 
     // Flags
     const flags = [];
-    activeContractors.filter(c => c.status === 'Finishing').forEach(c => {
-      flags.push({ type:'red', msg:`${c.name} contract ending ${c.end} — review extension or replacement` });
-    });
-    if (notesThisMonth === 0) {
-      flags.push({ type:'amber', msg:'No activity logged this month — schedule an account touchpoint' });
-    }
-    const staleSubs = submissions.filter(s => {
-      const st = (s.status||'').toLowerCase();
-      return st.includes('offer') && daysSince(s.dateAdded) > 5;
-    }).length;
-    if (staleSubs > 0) {
-      flags.push({ type:'amber', msg:`${staleSubs} offer${staleSubs>1?'s':''} pending >5 days — chase for decision` });
-    }
-    if (flags.length === 0) {
-      flags.push({ type:'green', msg:'No issues flagged for this account' });
-    }
+    const atRisk = jobRows.filter(j => j.ragClass === 'p-red');
+    atRisk.forEach(j => flags.push({ type:'red', msg:`${j.title} — ${j.daysOpen} days open, pipeline stalling` }));
 
-    return {
-      corpName: corp.name,
-      owner: corp.owner ? `${corp.owner.firstName} ${corp.owner.lastName}` : '—',
-      type: corp.clientCorporationType || '—',
-      lastActivity,
-      permFees, contractGP, totalGP,
-      placCount: placements.length,
-      permByConsultant,
-      activeContractors,
-      openJobs: jobs.length, openPerm, openContract,
-      totalSubs, interviews,
-      byCategory,
-      notesThisMonth,
-      contactCount: contacts.length,
-      fillRate, filledJobCount, totalJobCount,
-      flags,
-    };
+    const stalledPipeline = jobRows.filter(j => j.subsCount === 0 && j.daysOpen > 7);
+    stalledPipeline.forEach(j => {
+      if (!atRisk.find(r => r.id === j.id))
+        flags.push({ type:'amber', msg:`${j.title} — no CVs sent yet (${j.daysOpen} days open)` });
+    });
+
+    if (fillRate !== null && fillRate < 30 && totalJobCount > 5)
+      flags.push({ type:'amber', msg:`${fillRate}% historical fill rate (${filledJobCount}/${totalJobCount} jobs) — review brief quality` });
+
+    if (flags.length === 0)
+      flags.push({ type:'green', msg:'No issues flagged — all jobs active' });
+
+    return { corp, jobRows, totalSubs, totalInterviews, totalPlacs, openPerm, openContract, typeBreakdown, fillRate, filledJobCount, totalJobCount };
   }
 
-  // ── Render ───────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────
   function render(d) {
-    // Header
-    document.getElementById('corpName').textContent = d.corpName;
-    document.getElementById('corpMeta').innerHTML =
-      `Owner: <strong>${esc(d.owner)}</strong>&nbsp;·&nbsp;${esc(d.type)}`;
-    document.getElementById('lastContact').textContent = d.lastActivity;
-    document.getElementById('revYear').textContent = `YTD · FY ${new Date().getFullYear()}`;
+    const owner = d.corp.owner ? `${d.corp.owner.firstName} ${d.corp.owner.lastName}` : '—';
 
-    // Revenue
-    document.getElementById('mPermFees').textContent   = fmt(d.permFees);
-    document.getElementById('mContractGP').textContent = fmt(d.contractGP);
-    document.getElementById('mTotalGP').textContent    = fmt(d.totalGP);
-    document.getElementById('mPlacCount').textContent  = d.placCount;
-    document.getElementById('mPermSub').textContent    = `${d.permByConsultant.length} consultants`;
-    document.getElementById('mContractSub').textContent= `${d.activeContractors.length} active contractors`;
-    document.getElementById('mTotalSub').textContent   = 'perm + contract';
-    document.getElementById('mPlacSub').textContent    = `perm + contract`;
+    document.getElementById('corpName').textContent = d.corp.name || `Corp #${d.corp.id}`;
+    document.getElementById('corpMeta').textContent = `Owner: ${owner}`;
+    document.getElementById('hdrJobCount').textContent = d.jobRows.length;
 
-    // Pipeline
-    document.getElementById('mOpenJobs').textContent     = d.openJobs;
-    document.getElementById('mOpenJobsSub').textContent  = `${d.openPerm} perm · ${d.openContract} contract`;
-    document.getElementById('mSubs').textContent         = d.totalSubs;
-    document.getElementById('mSubsSub').textContent      = `active submissions`;
-    document.getElementById('mInterviews').textContent   = d.interviews;
-    document.getElementById('mInterviewsSub').textContent= 'at interview stage';
+    // Pipeline metrics
+    document.getElementById('mJobs').textContent       = d.jobRows.length;
+    document.getElementById('mJobsSub').textContent    = `${d.openPerm} perm · ${d.openContract} contract`;
+    document.getElementById('mSubs').textContent       = d.totalSubs;
+    document.getElementById('mSubsSub').textContent    = `across all open jobs`;
+    document.getElementById('mInterviews').textContent = d.totalInterviews;
+    document.getElementById('mPlacs').textContent      = d.totalPlacs;
+    document.getElementById('mPlacsSub').textContent   = d.fillRate !== null ? `${d.fillRate}% all-time fill rate` : '';
 
-    // Category bars
-    if (d.byCategory.length > 0) {
-      document.getElementById('practiceSection').style.display = '';
-      const maxCat = d.byCategory[0][1];
-      document.getElementById('practiceBars').innerHTML = d.byCategory.map(([name, count]) => `
-        <div class="bar-row">
-          <div class="bar-name">${esc(name)}</div>
-          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxCat*100)}%"></div></div>
-          <div class="bar-val" style="color:var(--muted); font-weight:400;">${count} job${count>1?'s':''}</div>
-        </div>`).join('');
-    }
+    // Type bars
+    const maxType = d.typeBreakdown.length ? d.typeBreakdown[0][1] : 1;
+    document.getElementById('typeBar').innerHTML = d.typeBreakdown.map(([name, count]) => `
+      <div class="bar-row">
+        <div class="bar-name">${esc(name)}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxType*100)}%"></div></div>
+        <div class="bar-val">${count}</div>
+      </div>`).join('');
 
-    // Contractors
-    document.getElementById('contractorCount').textContent = d.activeContractors.length;
-    document.getElementById('contractorRows').innerHTML = d.activeContractors.length
-      ? d.activeContractors.map(c => `
-          <tr>
-            <td>${esc(c.name)}</td>
-            <td class="muted">${esc(c.role)}</td>
-            <td class="muted">${esc(c.end)}</td>
-            <td>${contractorPill(c.status)}</td>
-          </tr>`).join('')
-      : `<tr><td colspan="4" class="empty-row">No active contractors</td></tr>`;
-
-    // Perm by consultant
-    document.getElementById('permRows').innerHTML = d.permByConsultant.length
-      ? d.permByConsultant.map(p => `
-          <tr>
-            <td>${esc(p.name)}</td>
-            <td>${p.count}</td>
-            <td class="muted">${p.avgFee > 0 ? fmt(p.avgFee) : '—'}</td>
-          </tr>`).join('')
-      : `<tr><td colspan="3" class="empty-row">No perm placements YTD</td></tr>`;
+    // Jobs table
+    document.getElementById('jobRows').innerHTML = d.jobRows.length
+      ? d.jobRows.map(j => `
+        <tr>
+          <td>${esc(j.title)}</td>
+          <td class="muted">${esc(j.owner)}</td>
+          <td class="muted">${esc(j.type)}</td>
+          <td class="muted ${j.daysOpen > 60 ? 'c-red' : j.daysOpen > 30 ? 'c-amber' : ''}">${j.daysOpen}d</td>
+          <td class="num">${j.subsCount}</td>
+          <td class="num">${j.interviews}</td>
+          <td><span class="pill ${j.ragClass}">${esc(j.rag)}</span></td>
+        </tr>`).join('')
+      : `<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--muted);">No open jobs</td></tr>`;
 
     // Flags
     document.getElementById('flags').innerHTML = d.flags.map(f => `
-      <div class="flag flag-${f.type}">
-        <span class="flag-icon">${f.type==='red'?'⚠':f.type==='green'?'✓':'⏱'}</span>
+      <div class="flag f-${f.type}">
+        <span>${f.type==='red'?'⚠':f.type==='green'?'✓':'⏱'}</span>
         <span>${esc(f.msg)}</span>
       </div>`).join('');
-
-    // Health metrics
-    document.getElementById('mNotes').textContent    = d.notesThisMonth;
-    document.getElementById('mContacts').textContent = d.contactCount;
-    if (d.fillRate !== null) {
-      document.getElementById('mFillRate').textContent    = d.fillRate + '%';
-      document.getElementById('mFillRateSub').textContent = `${d.filledJobCount} of ${d.totalJobCount} jobs`;
-    } else {
-      document.getElementById('mFillRate').textContent = '—';
-    }
 
     setState(null);
     document.getElementById('card').classList.add('visible');
   }
 
-  // ── State management ──────────────────────────────────────────────
+  // ── State ─────────────────────────────────────────────────────────
   function setState(id) {
     ['stateLoading','stateNoConn','stateError'].forEach(s =>
-      document.getElementById(s).classList.add('hidden')
+      document.getElementById(s).classList.toggle('hidden', s !== id)
     );
-    if (id) document.getElementById(id).classList.remove('hidden');
+    if (!id) document.getElementById('stateLoading').classList.add('hidden');
   }
 
   // ── Boot ──────────────────────────────────────────────────────────
@@ -626,22 +357,12 @@
     }
 
     try {
-      // First wave — corp + jobs needed before submissions
-      const [corp, jobs, placements, allPlacements, notes, contacts, allJobs] = await Promise.all([
+      const [corp, openJobs, allJobs] = await Promise.all([
         fetchCorp(entityId),
-        fetchJobs(entityId),
-        fetchPlacements(entityId),
-        fetchAllPlacements(entityId),
-        fetchNotes(entityId),
-        fetchContacts(entityId),
+        fetchOpenJobs(entityId),
         fetchAllJobs(entityId),
       ]);
-
-      // Submissions need job IDs (can't query by nested clientCorporation.id on JobSubmission)
-      const jobIds = jobs.map(j => j.id);
-      const submissions = await fetchSubmissionsForJobs(jobIds);
-
-      const data = analyse(corp, jobs, submissions, placements, allPlacements, notes, contacts, allJobs);
+      const data = analyse(corp, openJobs, allJobs);
       render(data);
     } catch (err) {
       console.error('AccountCard:', err);
