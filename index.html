@@ -172,7 +172,7 @@
   // ── API — only patterns confirmed working from the jobs card ──────
   async function fetchCorp(id) {
     // Bare minimum fields only
-    const res = await bhGet(`entity/ClientCorporation/${id}?fields=id,name,owner(id,firstName,lastName)&meta=off`);
+    const res = await bhGet(`entity/ClientCorporation/${id}?fields=id,name&meta=off`);
     return res.data || res;
   }
 
@@ -288,10 +288,10 @@
 
   // ── Render ────────────────────────────────────────────────────────
   function render(d) {
-    const owner = d.corp.owner ? `${d.corp.owner.firstName} ${d.corp.owner.lastName}` : '—';
+    const owner = null;
 
     document.getElementById('corpName').textContent = d.corp.name || `Corp #${d.corp.id}`;
-    document.getElementById('corpMeta').textContent = `Owner: ${owner}`;
+    document.getElementById('corpMeta').textContent = '';
     document.getElementById('hdrJobCount').textContent = d.jobRows.length;
 
     // Pipeline metrics
