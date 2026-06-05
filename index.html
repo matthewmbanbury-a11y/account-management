@@ -42,7 +42,7 @@
         relativeURL: 'search/Task',
         data: {
           query: `clientCorporation.id:${entityId} AND isDeleted:false`,
-          fields: 'id,subject,dateAdded,status,owner(id,firstName,lastName)',
+          fields: 'id,subject,dateAdded,owner(id,firstName,lastName)',
           count: 3, start: 0, sort: '-dateAdded'
         }
       }, { timeout: 20000 });
