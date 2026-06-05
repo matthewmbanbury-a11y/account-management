@@ -2,328 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Account Management</title>
   <script src="//cdn.rawgit.com/krakenjs/post-robot/7da06445/dist/post-robot.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
-    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-    :root {
-      --bg:#0d1117; --surface:#161b22; --surface2:#1c2128; --border:#21262d;
-      --text:#e6edf3; --muted:#8b949e;
-      --blue:#58a6ff; --green:#3fb950; --yellow:#d29922; --red:#f78166; --purple:#bc8cff;
-    }
-    html,body { height:100%; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); font-size:13px; }
-    body { display:flex; flex-direction:column; }
-
-    /* ── Header ── */
-    .header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px 10px; border-bottom:1px solid var(--border); flex-shrink:0; }
-    .header-left { display:flex; align-items:center; gap:9px; }
-    .header-icon { width:26px; height:26px; background:linear-gradient(135deg,var(--blue),var(--purple)); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
-    .header-title { font-size:13px; font-weight:600; }
-    .header-sub { font-size:10px; color:var(--muted); margin-top:1px; }
-    .badges { display:flex; gap:5px; flex-shrink:0; }
-    .badge { font-family:'DM Mono',monospace; font-size:10px; padding:2px 7px; border-radius:20px; font-weight:500; }
-    .badge-green  { background:rgba(63,185,80,.15);  color:var(--green);  border:1px solid rgba(63,185,80,.3); }
-    .badge-blue   { background:rgba(88,166,255,.15); color:var(--blue);   border:1px solid rgba(88,166,255,.3); }
-    .badge-yellow { background:rgba(210,153,34,.15); color:var(--yellow); border:1px solid rgba(210,153,34,.3); }
-
-    /* ── Stats ── */
-    .stats { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--border); flex-shrink:0; }
-    .stat { padding:9px 12px; border-right:1px solid var(--border); }
-    .stat:last-child { border-right:none; }
-    .stat-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:3px; }
-    .stat-value { font-family:'DM Mono',monospace; font-size:16px; font-weight:500; line-height:1; }
-    .stat-delta { font-size:10px; margin-top:3px; color:var(--muted); }
-    .up   { color:var(--green); }
-    .down { color:var(--red); }
-    .warn { color:var(--yellow); }
-
-    /* ── Jobs list ── */
-    .jobs-list { flex:1; overflow-y:auto; min-height:0; }
-    .jobs-list::-webkit-scrollbar { width:3px; }
-    .jobs-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-
-    .job-row { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid var(--border); animation:fadeIn .15s ease both; }
-    .job-row:last-child { border-bottom:none; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(2px)} to{opacity:1;transform:none} }
-
-    .job-rag { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .rag-green  { background:var(--green); box-shadow:0 0 5px rgba(63,185,80,.5); }
-    .rag-yellow { background:var(--yellow); box-shadow:0 0 5px rgba(210,153,34,.5); }
-    .rag-red    { background:var(--red); box-shadow:0 0 5px rgba(247,129,102,.5); }
-
-    .job-info { flex:1; min-width:0; }
-    .job-title { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .job-meta  { font-size:10px; color:var(--muted); margin-top:1px; }
-
-    .job-stats { display:flex; gap:12px; flex-shrink:0; }
-    .job-stat { text-align:right; }
-    .job-stat-val { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
-    .job-stat-lbl { font-size:9px; color:var(--muted); }
-
-    .job-badge { font-family:'DM Mono',monospace; font-size:9px; padding:2px 6px; border-radius:12px; font-weight:500; flex-shrink:0; }
-
-    /* ── States ── */
-    .state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:20px; }
-    .state-msg { font-size:11px; color:var(--muted); text-align:center; max-width:260px; line-height:1.6; }
-    .state-title { font-size:13px; font-weight:600; }
-    .spinner { width:22px; height:22px; border:2px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin .75s linear infinite; }
-    @keyframes spin { to{transform:rotate(360deg)} }
-    .retry-btn { padding:5px 14px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:11px; border-radius:6px; cursor:pointer; }
-    .retry-btn:hover { border-color:var(--blue); color:var(--blue); }
-    .hidden { display:none !important; }
-  </style>
 </head>
-<body>
+<body style="font-family:sans-serif;padding:12px;font-size:13px;">
 
-  <div class="header hidden" id="header">
-    <div class="header-left">
-      <div class="header-icon">🏢</div>
-      <div>
-        <div class="header-title" id="corpName">—</div>
-        <div class="header-sub" id="corpSub">—</div>
-      </div>
-    </div>
-    <div class="badges">
-      <span class="badge badge-blue hidden" id="badgeOpen"></span>
-      <span class="badge badge-yellow hidden" id="badgeAtRisk"></span>
-    </div>
-  </div>
-
-  <div class="stats hidden" id="stats">
-    <div class="stat">
-      <div class="stat-label">Open Jobs</div>
-      <div class="stat-value" id="sJobs">—</div>
-      <div class="stat-delta" id="dJobs"></div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Total CVs</div>
-      <div class="stat-value" id="sSubs">—</div>
-      <div class="stat-delta" id="dSubs"></div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Interviews</div>
-      <div class="stat-value" id="sInterviews">—</div>
-      <div class="stat-delta" id="dInterviews"></div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Placements</div>
-      <div class="stat-value" id="sPlacs">—</div>
-      <div class="stat-delta" id="dPlacs"></div>
-    </div>
-  </div>
-
-  <div class="jobs-list hidden" id="jobsList"></div>
-
-  <div class="state" id="stateLoading">
-    <div class="spinner"></div>
-    <div class="state-msg">Loading account data…</div>
-  </div>
-  <div class="state hidden" id="stateNoConn">
-    <div class="state-title">Not connected</div>
-    <div class="state-msg">Open this card from a Client Corporation record.</div>
-  </div>
-  <div class="state hidden" id="stateError">
-    <div class="state-title">Could not load data</div>
-    <div class="state-msg" id="errMsg"></div>
-    <button class="retry-btn" onclick="init()">Retry</button>
-  </div>
+  <div id="out">Connecting…</div>
 
 <script>
-  // ── Exact AppBridge pattern from working jobs card ─────────────────
-  const ONE_DAY = 86400000;
   const getParam = k => new URLSearchParams(location.search).get(k);
-  const daysSince = ts => Math.round((Date.now() - ts) / ONE_DAY);
-  const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const out = document.getElementById('out');
 
-  let regAttempts = 0;
-  const MAX_REG = 4;
-
+  let attempts = 0;
   function register() {
-    regAttempts++;
+    attempts++;
     postRobot.sendToParent('register', { title: 'Account Management' }, { timeout: 5000 })
-      .then(() => onRegistered(true))
-      .catch(() => {
-        if (regAttempts < MAX_REG) setTimeout(register, 500);
-        else onRegistered(false);
-      });
+      .then(() => run())
+      .catch(() => { if (attempts < 4) setTimeout(register, 500); else out.textContent = 'No AppBridge'; });
   }
 
-  // Identical to jobs card
-  function bhGet(relativeURL) {
-    return postRobot.sendToParent('httpGET', { relativeURL }, { timeout: 20000 })
-      .then(evt => {
-        const p = evt.data;
-        if (!p) throw new Error('Empty response');
-        if (p.error) throw new Error(JSON.stringify(p.error));
-        return p;
-      });
-  }
-
-  function bhPost(relativeURL, body) {
-    return postRobot.sendToParent('httpPOST', { relativeURL, data: body }, { timeout: 20000 })
-      .then(evt => {
-        const p = evt.data;
-        if (!p) throw new Error('Empty response');
-        if (p.error) throw new Error(JSON.stringify(p.error));
-        return p;
-      });
-  }
-
-  // ── Data — same fields as jobs card, scoped to company ────────────
-  // Jobs card fetches: entity/JobOrder/{id} + search/JobOrder (for similar jobs)
-  // Here we just use search/JobOrder for all jobs at this company — identical POST shape
-  async function fetchCompanyJobs(corpId) {
-    const data = await bhPost('search/JobOrder', {
-      query: `clientCorporation.id:${corpId} AND isDeleted:false AND isOpen:true`,
-      fields: [
-        'id','title','status','employmentType','dateAdded',
-        'owner(id,firstName,lastName)',
-        'submissions[100](dateAdded,status,jobOrder(id))',
-        'placements[50](dateAdded,jobOrder(id))'
-      ].join(','),
-      count: 200,
-      start: 0,
-      sort: '-dateAdded'
-    });
-    return data.data || [];
-  }
-
-  // ── Analysis — per-job RAG, same logic as jobs card ───────────────
-  function analyseJob(j) {
-    const now = Date.now();
-    const subs  = j.submissions?.data || [];
-    const placs = j.placements?.data  || [];
-    const daysOpen = Math.round((now - j.dateAdded) / ONE_DAY);
-
-    const interviews = subs.filter(s => {
-      const st = (s.status||'').toLowerCase();
-      return st.includes('interview') || st.includes('1st') || st.includes('2nd') || st.includes('3rd') || st.includes('shortlist');
-    }).length;
-
-    const subDates = subs.map(s => s.dateAdded).sort((a,b) => b-a);
-    const daysSinceSub = subDates.length ? Math.round((now - subDates[0]) / ONE_DAY) : daysOpen;
-
-    let rag;
-    if (placs.length > 0)                                    rag = 'green';
-    else if (daysOpen > 60 || (daysSinceSub > 14 && subs.length > 0)) rag = 'red';
-    else if (daysOpen > 30 || daysSinceSub > 7)              rag = 'yellow';
-    else                                                     rag = 'green';
-
-    return { subs: subs.length, interviews, placs: placs.length, daysOpen, daysSinceSub, rag };
-  }
-
-  // ── Render ────────────────────────────────────────────────────────
-  function render(corpId, jobs) {
-    const analysed = jobs.map(j => ({ job: j, metrics: analyseJob(j) }));
-
-    const totSubs       = analysed.reduce((s,a) => s + a.metrics.subs, 0);
-    const totInterviews = analysed.reduce((s,a) => s + a.metrics.interviews, 0);
-    const totPlacs      = analysed.reduce((s,a) => s + a.metrics.placs, 0);
-    const atRisk        = analysed.filter(a => a.metrics.rag === 'red').length;
-
-    // Header
-    document.getElementById('corpName').textContent = `Company #${corpId}`;
-    document.getElementById('corpSub').textContent  = `${jobs.length} open job${jobs.length !== 1 ? 's' : ''}`;
-    if (jobs.length) {
-      const b = document.getElementById('badgeOpen');
-      b.textContent = `${jobs.length} open`;
-      b.classList.remove('hidden');
-    }
-    if (atRisk) {
-      const b = document.getElementById('badgeAtRisk');
-      b.textContent = `${atRisk} at risk`;
-      b.classList.remove('hidden');
-    }
-
-    // Stats
-    document.getElementById('sJobs').textContent       = jobs.length;
-    document.getElementById('sSubs').textContent       = totSubs;
-    document.getElementById('sInterviews').textContent = totInterviews;
-    document.getElementById('sPlacs').textContent      = totPlacs;
-    document.getElementById('dJobs').innerHTML         = `<span class="${atRisk ? 'warn' : 'up'}">${atRisk} at risk</span>`;
-    document.getElementById('dSubs').innerHTML         = totSubs > 0 ? `<span>across all jobs</span>` : `<span class="warn">none sent</span>`;
-    document.getElementById('dInterviews').textContent = 'at interview stage';
-    document.getElementById('dPlacs').textContent      = 'this account';
-
-    // Jobs list
-    const list = document.getElementById('jobsList');
-    if (!analysed.length) {
-      list.innerHTML = `<div class="state"><div class="state-msg">No open jobs for this account.</div></div>`;
-    } else {
-      list.innerHTML = analysed.map(({ job: j, metrics: m }, i) => {
-        const owner = j.owner ? `${j.owner.firstName} ${j.owner.lastName}` : '—';
-        const type  = j.employmentType || '—';
-        const badgeCls = type.toLowerCase().includes('perm') ? 'badge-green' : 'badge-blue';
-        return `
-          <div class="job-row" style="animation-delay:${i*30}ms">
-            <div class="job-rag rag-${m.rag}"></div>
-            <div class="job-info">
-              <div class="job-title">${esc(j.title || 'Untitled')}</div>
-              <div class="job-meta">${esc(owner)} · ${m.daysOpen}d open</div>
-            </div>
-            <div class="job-stats">
-              <div class="job-stat">
-                <div class="job-stat-val ${m.subs === 0 ? 'warn' : ''}">${m.subs}</div>
-                <div class="job-stat-lbl">CVs</div>
-              </div>
-              <div class="job-stat">
-                <div class="job-stat-val">${m.interviews}</div>
-                <div class="job-stat-lbl">Intrvw</div>
-              </div>
-              <div class="job-stat">
-                <div class="job-stat-val ${m.placs > 0 ? 'up' : ''}">${m.placs}</div>
-                <div class="job-stat-lbl">Placed</div>
-              </div>
-            </div>
-            <span class="job-badge ${badgeCls}">${esc(type)}</span>
-          </div>`;
-      }).join('');
-    }
-
-    ['header','stats','jobsList'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-    setState(null);
-  }
-
-  // ── State ─────────────────────────────────────────────────────────
-  function setState(id) {
-    ['stateLoading','stateNoConn','stateError'].forEach(s =>
-      document.getElementById(s).classList.add('hidden')
-    );
-    if (id) document.getElementById(id).classList.remove('hidden');
-  }
-
-  // ── Boot — identical to jobs card ─────────────────────────────────
-  async function onRegistered(ok) {
-    const entityId = parseInt(getParam('EntityID'),       10);
-    const userId   = parseInt(getParam('UserID'),         10);
-    const corpId   = parseInt(getParam('CorporationID'),  10);
-    const plId     = parseInt(getParam('PrivateLabelID'), 10);
-
-    if (!ok || !entityId || !userId || !corpId || !plId) {
-      setState('stateNoConn'); return;
-    }
+  async function run() {
+    const entityId = parseInt(getParam('EntityID'), 10);
+    out.textContent = 'Registered. EntityID=' + entityId + '. Fetching…';
 
     try {
-      // EntityID on a ClientCorporation record IS the company ID
-      const jobs = await fetchCompanyJobs(entityId);
-      render(entityId, jobs);
-    } catch (err) {
-      console.error('AccountCard:', err);
-      setState('stateError');
-      document.getElementById('errMsg').textContent = err.message || String(err);
+      const evt = await postRobot.sendToParent('httpPOST', {
+        relativeURL: 'search/JobOrder',
+        data: {
+          query: 'clientCorporation.id:' + entityId + ' AND isDeleted:false AND isOpen:true',
+          fields: 'id,title,status',
+          count: 5,
+          start: 0
+        }
+      }, { timeout: 20000 });
+
+      // Log everything so we can see the shape
+      console.log('raw evt.data:', evt.data);
+      out.innerHTML = '<pre>' + JSON.stringify(evt.data, null, 2) + '</pre>';
+    } catch(err) {
+      out.textContent = 'Error: ' + err.message;
+      console.error(err);
     }
   }
 
-  async function init() {
-    setState('stateLoading');
-    ['header','stats','jobsList'].forEach(id => document.getElementById(id).classList.add('hidden'));
-    regAttempts = 0;
-    register();
-  }
-
-  window.addEventListener('load', init);
+  window.addEventListener('load', register);
 </script>
 </body>
 </html>
