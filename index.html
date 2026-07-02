@@ -5,100 +5,34 @@
   <title>Account Management</title>
   <script src="//cdn.rawgit.com/krakenjs/post-robot/7da06445/dist/post-robot.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#0d1117;--surface:#161b22;--border:#21262d;--text:#e6edf3;--muted:#8b949e;--blue:#58a6ff;--green:#3fb950;--yellow:#d29922;--red:#f78166;--purple:#bc8cff;}
-    html,body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
-    .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface)}
-    .topbar-title{font-size:15px;font-weight:600}.topbar-sub{font-size:11px;color:var(--muted)}
-    .badges{display:flex;gap:5px;flex-wrap:wrap}
-    .badge{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
-    .b-blue{background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3)}
-    .b-green{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
-    .b-yellow{background:rgba(210,153,34,.15);color:var(--yellow);border:1px solid rgba(210,153,34,.3)}
-    .b-red{background:rgba(247,129,102,.15);color:var(--red);border:1px solid rgba(247,129,102,.3)}
-    .b-purple{background:rgba(188,140,255,.15);color:var(--purple);border:1px solid rgba(188,140,255,.3)}
-    .briefing{display:flex;gap:14px;align-items:flex-start;padding:14px 20px;border-bottom:1px solid var(--border);background:linear-gradient(to right,rgba(188,140,255,.05),transparent)}
-    .briefing-icon{font-size:20px;flex-shrink:0;color:var(--purple)}
-    .briefing-label{font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:5px}
-    .briefing-text{font-size:12px;line-height:1.7;color:var(--text)}
-    .page{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
-    .col{display:flex;flex-direction:column;gap:14px}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-    .card-head{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border)}
-    .card-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
-    .card-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
-    .stat-grid{display:grid;gap:1px;background:var(--border)}
-    .sg-4{grid-template-columns:repeat(4,1fr)}.sg-3{grid-template-columns:repeat(3,1fr)}.sg-2{grid-template-columns:repeat(2,1fr)}
-    .stat{background:var(--surface);padding:10px 12px}
-    .stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
-    .stat-value{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;line-height:1}
-    .stat-sub{font-size:10px;color:var(--muted);margin-top:3px}
-    .c-green{color:var(--green)}.c-yellow{color:var(--yellow)}.c-red{color:var(--red)}.c-blue{color:var(--blue)}.c-purple{color:var(--purple)}
-    .health{display:flex;align-items:center;gap:14px;padding:12px}
-    .health-score{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;line-height:1}
-    .health-right{flex:1}
-    .health-label{font-size:13px;font-weight:500;margin-bottom:5px}
-    .health-bar-outer{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:4px}
-    .health-bar-inner{height:100%;border-radius:3px}
-    .health-detail{font-size:10px;color:var(--muted)}
-    .funnel{display:flex;align-items:flex-end;padding:12px;gap:4px}
-    .f-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-    .f-bar{width:100%;border-radius:3px 3px 0 0;min-height:4px}
-    .f-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:500}
-    .f-lbl{font-size:9px;color:var(--muted);text-align:center}
-    .f-pct{font-size:9px;color:var(--muted)}
-    .f-arrow{color:var(--border);font-size:16px;padding-bottom:22px;flex-shrink:0}
-    .ytd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
-    .ytd-cell{background:var(--surface);padding:10px 12px;text-align:center}
-    .ytd-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
-    .ytd-vals{display:flex;justify-content:center;gap:10px;margin-bottom:3px}
-    .ytd-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:500}
-    .ytd-sub{font-size:9px;color:var(--muted)}
-    .ytd-delta{font-size:10px;margin-top:3px;font-weight:500}
-    .rows{}
-    .row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border)}
-    .row:last-child{border-bottom:none}
-    .rag{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-    .rag-green{background:var(--green);box-shadow:0 0 4px rgba(63,185,80,.5)}
-    .rag-yellow{background:var(--yellow);box-shadow:0 0 4px rgba(210,153,34,.5)}
-    .rag-red{background:var(--red);box-shadow:0 0 4px rgba(247,129,102,.5)}
-    .rag-gray{background:var(--border)}.rag-blue{background:var(--blue);box-shadow:0 0 4px rgba(88,166,255,.4)}
-    .row-info{flex:1;min-width:0}
-    .row-title{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .row-meta{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .row-right{display:flex;gap:5px;align-items:center;flex-shrink:0}
-    .nums{display:flex;gap:10px}
-    .num{text-align:right}
-    .num-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:500}
-    .num-lbl{font-size:9px;color:var(--muted)}
-    .pill{font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:12px;flex-shrink:0;white-space:nowrap}
-    .p-perm{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
-    .p-contract{background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3)}
-    .p-sow{background:rgba(188,140,255,.15);color:var(--purple);border:1px solid rgba(188,140,255,.3)}
-    .p-red{background:rgba(247,129,102,.15);color:var(--red);border:1px solid rgba(247,129,102,.3)}
-    .p-yellow{background:rgba(210,153,34,.15);color:var(--yellow);border:1px solid rgba(210,153,34,.3)}
-    .p-gray{background:rgba(139,148,158,.1);color:var(--muted);border:1px solid var(--border)}
-    .p-green{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
-    .p-purple{background:rgba(188,140,255,.15);color:var(--purple);border:1px solid rgba(188,140,255,.3)}
-    .avatar{width:22px;height:22px;border-radius:50%;background:rgba(88,166,255,.15);border:1px solid rgba(88,166,255,.3);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:var(--blue);flex-shrink:0}
-    .contact-pills{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-    .bar-row{display:flex;align-items:center;gap:8px;padding:5px 12px}
-    .bar-label{font-size:11px;color:var(--muted);width:44px;flex-shrink:0}
-    .bar-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
-    .bar-fill{height:100%;border-radius:3px}
-    .bar-val{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;min-width:64px;text-align:right;flex-shrink:0}
-    .bar-label-wide{width:120px}
-    .insight-list{padding:8px 12px;display:flex;flex-direction:column;gap:5px}
-    .insight{display:flex;align-items:flex-start;gap:6px;font-size:11px;line-height:1.4}
-    .insight-icon{flex-shrink:0;margin-top:1px}
-    .insight.warn{color:var(--yellow)}.insight.alert{color:var(--red)}.insight.good{color:var(--green)}.insight.info{color:var(--muted)}
-    .empty{padding:12px;font-size:11px;color:var(--muted)}
-    .state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:200px}
-    .state-msg{font-size:12px;color:var(--muted)}
-    .spinner{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .75s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    a{color:inherit;text-decoration:none}a:hover{color:var(--blue);text-decoration:underline}
+    :root{--bg:#f7f9fc;--surface:#fff;--surface-soft:#fbfcff;--border:#dfe5ef;--text:#1f2937;--muted:#6b7280;--blue:#2f6fdb;--blue-dark:#1f56b3;--green:#19a765;--yellow:#f5a623;--red:#e94b5f;--purple:#7b61ff;--shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.04)}
+    html,body{font-family:'Roboto',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface);box-shadow:0 1px 2px rgba(16,24,40,.04)}
+    .topbar-title{font-size:16px;font-weight:500;color:#111827}.topbar-sub{font-size:11px;color:var(--muted);margin-top:2px}
+    .badges{display:flex;gap:6px;flex-wrap:wrap}.badge{font-size:10px;padding:3px 8px;border-radius:12px;font-weight:500;white-space:nowrap;border:1px solid transparent}
+    .b-blue{background:#eef5ff;color:var(--blue);border-color:#cfe0ff}.b-green{background:#ecfdf3;color:var(--green);border-color:#c8f2d8}.b-yellow{background:#fff7e6;color:#b66a00;border-color:#ffe1a8}.b-red{background:#fff1f3;color:var(--red);border-color:#ffd0d7}.b-purple{background:#f3f0ff;color:var(--purple);border-color:#ddd6ff}
+    .briefing{display:grid;grid-template-columns:44px 1.1fr 1.1fr 260px;gap:18px;align-items:start;margin:18px 20px 10px;padding:16px 18px;border:1px solid var(--border);border-radius:6px;background:linear-gradient(90deg,#fff,#f8fbff);box-shadow:var(--shadow)}
+    .briefing-icon{width:44px;height:44px;border-radius:50%;background:#eef5ff;border:1px solid #cfe0ff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .briefing-label{font-size:10px;color:#0f3d8a;text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-bottom:8px}.briefing-text{font-size:12px;line-height:1.65;color:var(--text)}
+    .briefing-actions{border-left:1px solid var(--border);padding-left:18px}.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}.action-item{font-size:11px;line-height:1.35;color:var(--text);display:flex;gap:7px}.action-item:before{content:'›';color:var(--blue);font-weight:700}.mini-health{border-left:1px solid var(--border);padding-left:18px}.mini-health-score{font-family:'Roboto Mono',monospace;font-size:30px;font-weight:500;color:var(--green)}
+    .insight-strip{margin:0 20px 10px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.insight-tile{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;box-shadow:var(--shadow);font-size:11px;line-height:1.35}.insight-tile.warn{border-left:3px solid var(--yellow)}.insight-tile.alert{border-left:3px solid var(--red)}.insight-tile.good{border-left:3px solid var(--green)}.insight-tile.info{border-left:3px solid var(--blue)}
+    .page{padding:0 20px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start}.col{display:flex;flex-direction:column;gap:12px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:var(--shadow)}.card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface-soft)}
+    .card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#111827}.card-count{font-family:'Roboto Mono',monospace;font-size:10px;color:var(--muted)}
+    .stat-grid{display:grid;gap:1px;background:var(--border)}.sg-4{grid-template-columns:repeat(4,1fr)}.sg-3{grid-template-columns:repeat(3,1fr)}.sg-2{grid-template-columns:repeat(2,1fr)}.stat{background:var(--surface);padding:12px}.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}.stat-value{font-family:'Roboto Mono',monospace;font-size:24px;font-weight:500;line-height:1;color:#111827}.stat-sub{font-size:11px;color:var(--muted);margin-top:5px}
+    .c-green{color:var(--green)!important}.c-yellow{color:var(--yellow)!important}.c-red{color:var(--red)!important}.c-blue{color:var(--blue)!important}.c-purple{color:var(--purple)!important}
+    .health{display:flex;align-items:center;gap:14px;padding:14px}.health-score{font-family:'Roboto Mono',monospace;font-size:38px;font-weight:500;line-height:1}.health-right{flex:1}.health-label{font-size:13px;font-weight:500;margin-bottom:6px}.health-bar-outer{height:7px;background:#edf1f7;border-radius:4px;overflow:hidden;margin-bottom:5px}.health-bar-inner{height:100%;border-radius:4px}.health-detail{font-size:10px;color:var(--muted)}
+    .funnel{display:flex;align-items:flex-end;padding:12px;gap:4px}.f-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}.f-bar{width:100%;border-radius:3px 3px 0 0;min-height:4px}.f-val{font-family:'Roboto Mono',monospace;font-size:16px;font-weight:500}.f-lbl{font-size:9px;color:var(--muted);text-align:center}.f-pct{font-size:9px;color:var(--muted)}.f-arrow{color:var(--border);font-size:16px;padding-bottom:22px;flex-shrink:0}.funnel-row{display:grid;grid-template-columns:90px 1fr 42px 62px;gap:10px;align-items:center;margin:8px 0}.funnel-label{font-size:12px;color:var(--text)}.funnel-track{height:16px;background:#eef2f7;border-radius:4px;overflow:hidden}.funnel-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),#64a7ff)}.funnel-val,.funnel-money{font-family:'Roboto Mono',monospace;font-size:11px;text-align:right;color:var(--text)}
+    .ytd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}.ytd-cell{background:var(--surface);padding:11px;text-align:center}.ytd-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}.ytd-vals{display:flex;justify-content:center;gap:10px;margin-bottom:3px}.ytd-val{font-family:'Roboto Mono',monospace;font-size:14px;font-weight:500}.ytd-sub{font-size:9px;color:var(--muted)}.ytd-delta{font-size:10px;margin-top:3px;font-weight:500}
+    .row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #edf1f7}.row:last-child{border-bottom:none}.rag{width:8px;height:8px;border-radius:50%;flex-shrink:0}.rag-green{background:var(--green)}.rag-yellow{background:var(--yellow)}.rag-red{background:var(--red)}.rag-gray{background:#aeb8c5}.rag-blue{background:var(--blue)}.row-info{flex:1;min-width:0}.row-title{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row-meta{font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row-right{display:flex;gap:5px;align-items:center;flex-shrink:0}.nums{display:flex;gap:10px}.num{text-align:right}.num-val{font-family:'Roboto Mono',monospace;font-size:12px;font-weight:500}.num-lbl{font-size:9px;color:var(--muted)}
+    .pill{font-family:'Roboto Mono',monospace;font-size:9px;padding:3px 7px;border-radius:12px;flex-shrink:0;white-space:nowrap;border:1px solid transparent}.p-perm{background:#ecfdf3;color:var(--green);border-color:#c8f2d8}.p-contract{background:#eef5ff;color:var(--blue);border-color:#cfe0ff}.p-sow{background:#f3f0ff;color:var(--purple);border-color:#ddd6ff}.p-red{background:#fff1f3;color:var(--red);border-color:#ffd0d7}.p-yellow{background:#fff7e6;color:#b66a00;border-color:#ffe1a8}.p-gray{background:#f4f6f9;color:var(--muted);border-color:#e3e8f0}.p-green{background:#ecfdf3;color:var(--green);border-color:#c8f2d8}.p-purple{background:#f3f0ff;color:var(--purple);border-color:#ddd6ff}
+    .avatar{width:24px;height:24px;border-radius:50%;background:#eef5ff;border:1px solid #cfe0ff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--blue);flex-shrink:0}.contact-pills{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+    .bar-row{display:flex;align-items:center;gap:8px;padding:6px 12px}.bar-label{font-size:11px;color:var(--muted);width:44px;flex-shrink:0}.bar-track{flex:1;height:7px;background:#eef2f7;border-radius:4px;overflow:hidden}.bar-fill{height:100%;border-radius:4px}.bar-val{font-family:'Roboto Mono',monospace;font-size:10px;font-weight:500;min-width:64px;text-align:right;flex-shrink:0}.bar-label-wide{width:120px}
+    .insight-list{padding:8px 12px;display:flex;flex-direction:column;gap:6px}.insight{display:flex;align-items:flex-start;gap:6px;font-size:11px;line-height:1.4}.insight-icon{flex-shrink:0;margin-top:1px}.insight.warn{color:#9a6200}.insight.alert{color:var(--red)}.insight.good{color:var(--green)}.insight.info{color:var(--muted)}
+    .empty{padding:12px;font-size:11px;color:var(--muted)}.state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:200px}.state-msg{font-size:12px;color:var(--muted)}.spinner{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .75s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}@media(max-width:1200px){.briefing{grid-template-columns:44px 1fr}.briefing-actions,.mini-health{border-left:none;padding-left:0}.insight-strip{grid-template-columns:repeat(2,1fr)}.page{grid-template-columns:1fr}} 
   </style>
 </head>
 <body>
@@ -162,9 +96,11 @@
   }
 
   function placRevenue(p){
+    // Commercial revenue: permanent/SOW fees where present; contract margin is Bill Rate - Pay Rate.
     if(p.fee&&p.fee>0)return p.fee;
     if(p.flatFee&&p.flatFee>0)return p.flatFee;
-    if(p.clientBillRate&&p.dateBegin&&p.dateEnd)return p.clientBillRate*workDays(p.dateBegin,p.dateEnd);
+    const margin=dailyMargin(p);
+    if(margin!==null&&p.dateBegin&&p.dateEnd)return margin*workDays(p.dateBegin,p.dateEnd);
     return 0;
   }
 
@@ -276,8 +212,8 @@
     if(keyPersonRisk.length>0)insights.push({type:'alert',icon:'🚨',msg:`Key person risk: ${keyPersonRisk.map(c=>c.firstName+' '+c.lastName+' ('+c.jobsRaised+' jobs)').join(', ')}`});
     if(contactsNeverContacted.length>0)insights.push({type:'warn',icon:'👤',msg:`${contactsNeverContacted.length} contacts never contacted`});
     if(contactsGoneCold.length>0)insights.push({type:'warn',icon:'🥶',msg:`${contactsGoneCold.length} contacts gone cold — 60+ days`});
-    if(revCY>revPY&&revPY>0)insights.push({type:'good',icon:'📈',msg:`Revenue up ${Math.round((revCY-revPY)/revPY*100)}% YTD vs prior year`});
-    else if(revCY<revPY&&revPY>0)insights.push({type:'warn',icon:'📉',msg:`Revenue down ${Math.round((revPY-revCY)/revPY*100)}% YTD vs prior year`});
+    if(revCY>revPY&&revPY>0)insights.push({type:'good',icon:'📈',msg:`Margin up ${Math.round((revCY-revPY)/revPY*100)}% YTD vs prior year`});
+    else if(revCY<revPY&&revPY>0)insights.push({type:'warn',icon:'📉',msg:`Margin down ${Math.round((revPY-revCY)/revPY*100)}% YTD vs prior year`});
     if(daysSinceContact!==null&&daysSinceContact>14)insights.push({type:'warn',icon:'📞',msg:`Last activity ${daysSinceContact} days ago — needs touchpoint`});
     else if(daysSinceContact!==null&&daysSinceContact<=3)insights.push({type:'good',icon:'✅',msg:`Active account — last contact ${daysSinceContact}d ago`});
     if(openOpps.length>0)insights.push({type:'info',icon:'🎯',msg:`${openOpps.length} open opportunit${openOpps.length>1?'ies':'y'} in pipeline`});
@@ -315,10 +251,25 @@
       </div>
       <div class="briefing">
         <div class="briefing-icon">✦</div>
-        <div style="flex:1">
-          <div class="briefing-label">AI Account Briefing</div>
-          <div class="briefing-text" id="ai-text" style="color:var(--muted);font-style:italic">Generating briefing…</div>
+        <div>
+          <div class="briefing-label">AI Account Summary</div>
+          <div class="briefing-text" id="ai-text" style="color:var(--muted);font-style:italic">Generating summary and suggested actions…</div>
         </div>
+        <div class="briefing-actions">
+          <div class="briefing-label">Suggested Actions</div>
+          <div class="action-grid">
+            ${insights.slice(0,4).map(i=>`<div class="action-item">${esc(i.msg)}</div>`).join('')}
+          </div>
+        </div>
+        <div class="mini-health">
+          <div class="briefing-label">Account Health</div>
+          <div class="mini-health-score" style="color:${healthColor}">${health}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${healthLabel}</div>
+          <div class="health-bar-outer" style="margin-top:8px"><div class="health-bar-inner" style="width:${health}%;background:${healthColor}"></div></div>
+        </div>
+      </div>
+      <div class="insight-strip">
+        ${insights.slice(0,4).map(i=>`<div class="insight-tile ${i.type}"><strong>${i.icon}</strong> ${esc(i.msg)}</div>`).join('')}
       </div>
       <div class="page">
 
@@ -331,7 +282,7 @@
               <div class="health-right">
                 <div class="health-label" style="color:${healthColor}">${healthLabel}</div>
                 <div class="health-bar-outer"><div class="health-bar-inner" style="width:${health}%;background:${healthColor}"></div></div>
-                <div class="health-detail">Revenue · pipeline · contact recency · contractors · opportunities</div>
+                <div class="health-detail">Margin · pipeline · contact recency · contractors · opportunities</div>
               </div>
             </div>
           </div>
@@ -345,10 +296,10 @@
             </div>
           </div>
           <div class="card">
-            <div class="card-head"><span class="card-title">Revenue</span></div>
+            <div class="card-head"><span class="card-title">Commercial Margin</span></div>
             <div class="stat-grid sg-2">
-              <div class="stat"><div class="stat-label">L12 Months</div><div class="stat-value c-green">${fmtGBP(revL12M)}</div><div class="stat-sub">bill rate basis</div></div>
-              <div class="stat"><div class="stat-label">Lifetime</div><div class="stat-value">${fmtGBP(revAll)}</div><div class="stat-sub">${totalPlacs} placements</div></div>
+              <div class="stat"><div class="stat-label">Gross Margin L12M</div><div class="stat-value c-green">${fmtGBP(revL12M)}</div><div class="stat-sub">Contract = bill rate - pay rate</div></div>
+              <div class="stat"><div class="stat-label">Lifetime Margin</div><div class="stat-value">${fmtGBP(revAll)}</div><div class="stat-sub">${totalPlacs} placements</div></div>
               <div class="stat"><div class="stat-label">Fill Rate</div><div class="stat-value ${fillRate>=50?'c-green':fillRate>=30?'c-yellow':'c-red'}">${fillRate}%</div><div class="stat-sub">${totalPlacs} of ${allJobs.length} jobs</div></div>
               <div class="stat"><div class="stat-label">Avg Time to Fill</div><div class="stat-value">${avgTTF||'—'}</div><div class="stat-sub">${avgTTF?'days avg':''}</div></div>
             </div>
@@ -356,7 +307,7 @@
           <div class="card">
             <div class="card-head"><span class="card-title">YTD vs Prior Year</span></div>
             <div class="ytd-grid">
-              <div class="ytd-cell"><div class="ytd-label">Revenue</div><div class="ytd-vals"><div class="ytd-val c-green">${fmtGBP(revCY)}</div><div class="ytd-val" style="color:var(--muted)">${fmtGBP(revPY)}</div></div><div class="ytd-sub">${cyYr} vs ${pyYr}</div>${revDP!==null?`<div class="ytd-delta ${revDP>=0?'c-green':'c-red'}">${revDP>=0?'↑':'↓'} ${Math.abs(revDP)}% YoY</div>`:''}</div>
+              <div class="ytd-cell"><div class="ytd-label">Margin</div><div class="ytd-vals"><div class="ytd-val c-green">${fmtGBP(revCY)}</div><div class="ytd-val" style="color:var(--muted)">${fmtGBP(revPY)}</div></div><div class="ytd-sub">${cyYr} vs ${pyYr}</div>${revDP!==null?`<div class="ytd-delta ${revDP>=0?'c-green':'c-red'}">${revDP>=0?'↑':'↓'} ${Math.abs(revDP)}% YoY</div>`:''}</div>
               <div class="ytd-cell"><div class="ytd-label">Placements</div><div class="ytd-vals"><div class="ytd-val c-green">${placCY}</div><div class="ytd-val" style="color:var(--muted)">${placPY}</div></div><div class="ytd-sub">${cyYr} vs ${pyYr}</div>${plDP!==null?`<div class="ytd-delta ${plDP>=0?'c-green':'c-red'}">${plDP>=0?'↑':'↓'} ${Math.abs(plDP)}% YoY</div>`:''}</div>
               <div class="ytd-cell"><div class="ytd-label">Jobs Raised</div><div class="ytd-vals"><div class="ytd-val c-green">${jobsCY}</div><div class="ytd-val" style="color:var(--muted)">${jobsPY}</div></div><div class="ytd-sub">${cyYr} vs ${pyYr}</div>${jDP!==null?`<div class="ytd-delta ${jDP>=0?'c-green':'c-red'}">${jDP>=0?'↑':'↓'} ${Math.abs(jDP)}% YoY</div>`:''}</div>
             </div>
@@ -457,7 +408,7 @@
   async function generateBriefing(d){
     const el=document.getElementById('ai-text');
     try{
-      const prompt='You are an expert recruitment account manager assistant at La Fosse Associates. Based on this account data, write a concise 3-4 sentence briefing telling the account manager exactly what to do today. Be specific with numbers and names. Flowing prose, no bullet points.\n\nAccount data:\n- Health: '+d.healthScore+'/100 ('+d.healthLabel+')\n- Open jobs: '+d.openJobs+' ('+d.atRiskJobs+' at risk)'+(d.jobDetails.filter(j=>j.rag==='red').length?' — '+d.jobDetails.filter(j=>j.rag==='red').map(j=>j.title+' ('+j.daysOpen+'d, '+j.cvs+' CVs)').join(', '):'')+'\n- Contractors on-site: '+d.activeContractors+(d.endingSoon>0?' — '+d.endingSoon+' ending <30d: '+d.endingSoonNames.join(', '):'')+'\n- Revenue L12M: £'+d.revL12M.toLocaleString()+' | CY: £'+d.revCY.toLocaleString()+' vs PY: £'+d.revPY.toLocaleString()+(d.revDeltaPct!==null?' ('+d.revDeltaPct+'% YoY)':'')+'\n- Placements: '+d.totalPlacements+' | Fill rate: '+d.fillRate+'% | Avg TTF: '+(d.avgTTF||'unknown')+'d\n- Open opps: '+d.openOpps+'\n- Contacts: '+d.contacts+' total | '+d.contactsNeverContacted+' never contacted | '+d.contactsGoneCold+' cold'+(d.keyPersonRisk.length?'\n- KEY PERSON RISK: '+d.keyPersonRisk.join('; '):'')+'\n- Top consultant: '+(d.topConsultant||'unknown')+'\n- Last activity: '+(d.daysSinceLastActivity!==null?d.daysSinceLastActivity+'d ago ('+d.lastNoteAction+')':'unknown')+(d.whitespaceGaps.length?'\n- Whitespace gaps: '+d.whitespaceGaps.join(', '):'');
+      const prompt='You are an expert recruitment account manager assistant at La Fosse Associates. Based on this account data, write a concise 3-4 sentence account summary followed by suggested actions for the account manager today. Be specific with numbers and names. Flowing prose, no bullet points.\n\nAccount data:\n- Health: '+d.healthScore+'/100 ('+d.healthLabel+')\n- Open jobs: '+d.openJobs+' ('+d.atRiskJobs+' at risk)'+(d.jobDetails.filter(j=>j.rag==='red').length?' — '+d.jobDetails.filter(j=>j.rag==='red').map(j=>j.title+' ('+j.daysOpen+'d, '+j.cvs+' CVs)').join(', '):'')+'\n- Contractors on-site: '+d.activeContractors+(d.endingSoon>0?' — '+d.endingSoon+' ending <30d: '+d.endingSoonNames.join(', '):'')+'\n- Gross Margin L12M: £'+d.revL12M.toLocaleString()+' | CY: £'+d.revCY.toLocaleString()+' vs PY: £'+d.revPY.toLocaleString()+(d.revDeltaPct!==null?' ('+d.revDeltaPct+'% YoY)':'')+'\n- Placements: '+d.totalPlacements+' | Fill rate: '+d.fillRate+'% | Avg TTF: '+(d.avgTTF||'unknown')+'d\n- Open opps: '+d.openOpps+'\n- Contacts: '+d.contacts+' total | '+d.contactsNeverContacted+' never contacted | '+d.contactsGoneCold+' cold'+(d.keyPersonRisk.length?'\n- KEY PERSON RISK: '+d.keyPersonRisk.join('; '):'')+'\n- Top consultant: '+(d.topConsultant||'unknown')+'\n- Last activity: '+(d.daysSinceLastActivity!==null?d.daysSinceLastActivity+'d ago ('+d.lastNoteAction+')':'unknown')+(d.whitespaceGaps.length?'\n- Whitespace gaps: '+d.whitespaceGaps.join(', '):'');
 
       const resp=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
@@ -477,8 +428,8 @@
         if(d.atRiskJobs>0)parts.push(`${d.atRiskJobs} job${d.atRiskJobs>1?'s are':' is'} at risk — ${d.jobDetails.filter(j=>j.rag==='red').slice(0,2).map(j=>j.title+' ('+j.daysOpen+'d open)').join(' and ')} need immediate attention.`);
         if(d.endingSoon>0)parts.push(`${d.endingSoon} contractor${d.endingSoon>1?'s':''} ending within 30 days — ${d.endingSoonNames.slice(0,2).join(' and ')} — start extension conversations now.`);
         if(d.keyPersonRisk.length>0)parts.push(`Key person risk: ${d.keyPersonRisk.slice(0,2).join(' and ')} — high-value contacts with no recent activity.`);
-        if(d.revDeltaPct!==null&&d.revDeltaPct<-10)parts.push(`Revenue is down ${Math.abs(d.revDeltaPct)}% YTD vs prior year — focus on pipeline acceleration.`);
-        else if(d.revDeltaPct!==null&&d.revDeltaPct>10)parts.push(`Revenue up ${d.revDeltaPct}% YTD — strong account momentum to maintain.`);
+        if(d.revDeltaPct!==null&&d.revDeltaPct<-10)parts.push(`Margin is down ${Math.abs(d.revDeltaPct)}% YTD vs prior year — focus on pipeline acceleration.`);
+        else if(d.revDeltaPct!==null&&d.revDeltaPct>10)parts.push(`Margin up ${d.revDeltaPct}% YTD — strong account momentum to maintain.`);
         if(d.daysSinceLastActivity>14)parts.push(`No activity logged in ${d.daysSinceLastActivity} days — schedule an account touchpoint.`);
         if(d.contactsNeverContacted>10)parts.push(`${d.contactsNeverContacted} contacts have never been contacted — significant untapped relationship potential.`);
         el.textContent=parts.length?parts.join(' '):'Account is active with '+d.openJobs+' open jobs and '+d.activeContractors+' contractors on-site. Fill rate is '+d.fillRate+'% all time.';
