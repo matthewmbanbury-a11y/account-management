@@ -47,7 +47,33 @@
     a{color:var(--blue);text-decoration:none;font-weight:500}a:hover{text-decoration:underline}
     @media(max-width:1400px){.briefing{grid-template-columns:56px 1fr 1fr}.mini-health{grid-column:1/-1;border-left:none;border-top:1px solid var(--border);padding:14px 0 0}.kpi-grid{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:1100px){.briefing{grid-template-columns:56px 1fr}.briefing-actions{grid-column:1/-1;border-left:none;border-top:1px solid var(--border);padding:14px 0 0}.insight-strip{grid-template-columns:repeat(2,1fr)}.page{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-</style>
+
+
+    /* FINAL REBUILD PASS — clean Bullhorn-style SaaS dashboard */
+    body{background:#f4f7fb;color:#172033;font-size:13px}
+    #root{max-width:1680px;margin:0 auto;padding:14px 18px 24px}
+    .dashboard-shell{display:flex;flex-direction:column;gap:14px}
+    .dash-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:4px 2px 2px}
+    .dash-eyebrow{font-size:11px;line-height:1;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#1d6edb;margin-bottom:7px}
+    .dash-title{font-size:25px;line-height:1.15;font-weight:700;color:#101828;letter-spacing:-.02em}
+    .dash-subtitle{font-size:13px;line-height:1.5;color:#667085;margin-top:6px}
+    .dash-status{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:620px}
+    .badge{font-size:11px;padding:5px 10px;border-radius:999px;font-weight:700;background:#fff;border:1px solid #e2e8f0;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+    .hero-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(360px,.9fr) 260px;gap:14px;align-items:stretch}
+    .hero-card,.action-panel,.health-panel,.kpi-card,.card,.priority-card{background:rgba(255,255,255,.96);border:1px solid #e5edf6;border-radius:18px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 16px 42px rgba(15,35,80,.06)}
+    .hero-card{padding:22px 24px;position:relative;overflow:hidden;min-height:178px}
+    .hero-card:after{content:'';position:absolute;right:-78px;top:-98px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(34,120,238,.16),rgba(34,120,238,0) 68%)}
+    .section-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#1d6edb;margin-bottom:10px}
+    .hero-text{font-size:14px;line-height:1.75;color:#344054;max-width:980px;position:relative;z-index:1}
+    .action-panel{padding:18px 18px;min-height:178px}.action-list{display:flex;flex-direction:column;gap:10px}.action-card{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;padding:10px 10px;border:1px solid #ecf1f7;border-radius:12px;background:#fbfdff}.action-dot{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}.action-card.alert .action-dot{background:#fff1f3;color:#e11d48}.action-card.warn .action-dot{background:#fff7e6;color:#d97706}.action-card.good .action-dot{background:#ecfdf3;color:#16a35f}.action-card.info .action-dot{background:#eef5ff;color:#1d6edb}.action-copy{font-size:12px;line-height:1.45;color:#344054;font-weight:500}
+    .health-panel{padding:18px;display:flex;flex-direction:column;justify-content:space-between;min-height:178px}.health-ring{width:104px;height:104px;border-radius:50%;background:conic-gradient(var(--ring-color) calc(var(--score)*1%),#edf2f7 0);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;position:relative}.health-ring:after{content:'';position:absolute;width:78px;height:78px;border-radius:50%;background:#fff}.health-ring span{position:relative;z-index:1;font-family:'Roboto Mono',monospace;font-size:26px;font-weight:700;color:#101828}.health-panel-title{text-align:center;font-weight:800;color:#101828;font-size:14px}.health-panel-sub{text-align:center;font-size:11px;color:#667085;margin-top:4px}
+    .kpi-grid{margin:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}.kpi-card{border-radius:16px;padding:17px 16px;grid-template-columns:1fr;gap:10px;min-height:132px;position:relative;overflow:hidden}.kpi-card:after{content:'';position:absolute;right:-28px;top:-28px;width:92px;height:92px;border-radius:50%;background:#f2f7ff}.kpi-icon{width:34px;height:34px;border-radius:12px;font-size:16px;position:relative;z-index:1}.kpi-title{font-size:10px;letter-spacing:.08em;color:#667085;position:relative;z-index:1}.kpi-value{font-size:27px;letter-spacing:-.04em;position:relative;z-index:1}.kpi-sub,.kpi-delta{position:relative;z-index:1;font-size:11px;line-height:1.35}.kpi-delta{font-weight:700;color:#1d6edb}
+    .priority-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:14px}.priority-card{overflow:hidden}.card-head{padding:16px 18px 10px;border-bottom:1px solid #eef2f7}.card-title{font-size:12px;color:#101828;letter-spacing:.06em}.card-title:after{display:none}.card-count{font-size:11px;color:#667085}.rows.compact .row{padding:12px 18px}.row{padding:12px 18px;border-bottom:1px solid #eef2f7}.row-title{font-size:13px;color:#172033}.row-meta{font-size:11px;color:#667085}.pill{font-size:10px;padding:4px 8px}.rag{width:9px;height:9px}.split-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 18px 18px}.split-card{border:1px solid #eef2f7;background:#fbfdff;border-radius:14px;padding:14px}.split-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#667085;margin-bottom:8px}.split-value{font-family:'Roboto Mono',monospace;font-size:22px;font-weight:700;color:#101828}.split-sub{font-size:11px;color:#667085;margin-top:6px}.progress-row{padding:0 18px 16px}.progress-top{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;color:#667085;margin-bottom:8px}.progress-track{height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;display:flex}.progress-contract{background:#1d6edb}.progress-perm{background:#16a35f}.progress-sow{background:#7c3aed}
+    .main-grid{display:grid;grid-template-columns:1.25fr .9fr .9fr;gap:14px;align-items:start}.col{gap:14px}.bar-row{padding:7px 18px}.bar-track{height:8px;background:#eef2f7}.bar-fill{border-radius:999px}.empty{padding:18px;color:#667085}.insight-strip,.briefing,.page{display:none!important}.state{background:#fff;border:1px solid #e5edf6;border-radius:18px;margin:16px;padding:40px}
+    @media(max-width:1320px){.hero-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(3,1fr)}.priority-grid,.main-grid{grid-template-columns:1fr}}
+    @media(max-width:760px){#root{padding:10px}.kpi-grid{grid-template-columns:1fr}.split-grid{grid-template-columns:1fr}.dash-header{flex-direction:column}.dash-status{justify-content:flex-start}.hero-card,.action-panel,.health-panel{border-radius:14px}}
+
+  </style>
 </head>
 <body>
 <div id="root"><div class="state"><div class="spinner"></div><div class="state-msg">Loading account data…</div></div></div>
@@ -100,7 +126,7 @@
         for(let i=0;i<Math.min(placIds.length,200);i+=50)batches.push(placIds.slice(i,i+50));
         const res=await Promise.all(batches.map(b=>post('search/Placement',{
           query:b.map(id=>`id:${id}`).join(' OR '),
-          fields:'id,status,dateBegin,dateEnd,dateAdded,employmentType,clientBillRate,payRate,salaryUnit,hoursPerDay,fee,flatFee,customText1,candidate(id,firstName,lastName),jobOrder(id,title,dateAdded),owner(id,firstName,lastName)',
+          fields:'id,status,dateBegin,dateEnd,dateAdded,employmentType,clientBillRate,payRate,salaryUnit,hoursPerDay,fee,flatFee,customText1,customText8,candidate(id,firstName,lastName),jobOrder(id,title,dateAdded),owner(id,firstName,lastName)',
           count:50,start:0
         })));
         placements=res.flat();
@@ -139,30 +165,60 @@
   }
 
   const EMPLOYMENT_TYPES=['Asia Permanent','Asia Contract','Asia SoW','Europe Permanent','Europe Contract','UK Permanent','UK Contract','UK SoW','GCS SoW'];
+  const LIVE_CONTRACTOR_STATUSES=['released'];
+  const PRE_START_PLACEMENT_STATUSES=['ready to approve','submitted','under offer o365 initiated'];
+  const INACTIVE_PLACEMENT_STATUSES=['terminated'];
+  const DEAL_TYPES=['New Deal','Extension','Replacement'];
+  function norm(v){return String(v||'').toLowerCase().trim();}
   function employmentTypeLabel(t){const v=String(t||'').trim();if(!v)return '—';return EMPLOYMENT_TYPES.find(x=>x.toLowerCase()===v.toLowerCase())||v;}
+  function dealTypeLabel(v){const x=String(v||'').trim();if(!x)return 'Unknown';return DEAL_TYPES.find(d=>d.toLowerCase()===x.toLowerCase())||x;}
+  function isPerm(p){const tl=employmentTypeLabel(p.employmentType).toLowerCase();return tl.includes('perm')||tl.includes('direct');}
+  function isContract(p){const tl=employmentTypeLabel(p.employmentType).toLowerCase();return tl.includes('contract');}
+  function isSoW(p){const tl=employmentTypeLabel(p.employmentType).toLowerCase();return tl.includes('sow');}
+  function isNewDeal(p){return dealTypeLabel(p.customText8).toLowerCase()==='new deal';}
+  function isExtension(p){return dealTypeLabel(p.customText8).toLowerCase()==='extension';}
+  function isReplacement(p){return dealTypeLabel(p.customText8).toLowerCase()==='replacement';}
   function typePill(t){const tl=employmentTypeLabel(t).toLowerCase();if(tl.includes('sow'))return 'p-sow';if(tl.includes('perm')||tl.includes('direct'))return 'p-perm';if(tl.includes('contract'))return 'p-contract';return 'p-gray';}
+  function dealPill(p){const d=dealTypeLabel(p.customText8).toLowerCase();if(d==='new deal')return 'p-green';if(d==='extension')return 'p-yellow';if(d==='replacement')return 'p-purple';return 'p-gray';}
+  function isLiveContractor(p){const st=norm(p.status);return LIVE_CONTRACTOR_STATUSES.includes(st)&&p.dateBegin&&p.dateBegin<=now&&p.dateEnd&&p.dateEnd>=now;}
+  function isPendingPlacement(p){const st=norm(p.status);return PRE_START_PLACEMENT_STATUSES.includes(st)&&(!p.dateBegin||p.dateBegin>now);}
+  function isActiveOrPendingPlacement(p){const st=norm(p.status);return !INACTIVE_PLACEMENT_STATUSES.includes(st)&&(isLiveContractor(p)||PRE_START_PLACEMENT_STATUSES.includes(st));}
   function placPill(p){
-    const st=(p.status||'').toLowerCase(),left=p.dateEnd?daysFrom(p.dateEnd):null;
-    if(st==='approved'||st==='extension'){if(left===null)return{cls:'p-gray',label:'Active'};if(left<0)return{cls:'p-red',label:'Ended'};if(left<=30)return{cls:'p-yellow',label:left+'d left'};return{cls:'p-contract',label:left+'d left'};}
+    const st=norm(p.status),left=p.dateEnd?daysFrom(p.dateEnd):null;
+    if(isLiveContractor(p)){if(left<=30)return{cls:'p-yellow',label:left+'d left'};return{cls:'p-contract',label:left+'d left'};}
+    if(PRE_START_PLACEMENT_STATUSES.includes(st))return{cls:'p-yellow',label:p.status||'Pending'};
     if(st==='terminated')return{cls:'p-red',label:'Terminated'};
+    if(left!==null&&left<0)return{cls:'p-red',label:'Ended'};
     return{cls:'p-gray',label:p.status||'—'};
   }
   function contactRag(c){if(!c.lastActivity)return 'rag-red';const d=daysAgo(c.lastActivity.date);if(d<=14)return 'rag-green';if(d<=60)return 'rag-yellow';return 'rag-red';}
 
   function render(entityId,openJobs,allJobs,placements,contacts,notes,opps,contactLastActivity){
     const jm=openJobs.map(j=>({j,m:jobRag(j)}));
+    const l12Placements=placements.filter(p=>p.dateBegin&&p.dateBegin>=L12M);
+    const cyPlacements=placements.filter(p=>p.dateBegin&&p.dateBegin>=CY_START);
+    const pyPlacements=placements.filter(p=>p.dateBegin&&p.dateBegin>=PY_START&&p.dateBegin<=PY_END);
     const revAll=placements.reduce((s,p)=>s+placRevenue(p),0);
-    const revL12M=placements.filter(p=>p.dateBegin&&p.dateBegin>=L12M).reduce((s,p)=>s+placRevenue(p),0);
-    const revCY=placements.filter(p=>p.dateBegin&&p.dateBegin>=CY_START).reduce((s,p)=>s+placRevenue(p),0);
-    const revPY=placements.filter(p=>p.dateBegin&&p.dateBegin>=PY_START&&p.dateBegin<=PY_END).reduce((s,p)=>s+placRevenue(p),0);
-    const placCY=placements.filter(p=>p.dateBegin&&p.dateBegin>=CY_START).length;
-    const placPY=placements.filter(p=>p.dateBegin&&p.dateBegin>=PY_START&&p.dateBegin<=PY_END).length;
+    const revL12M=l12Placements.reduce((s,p)=>s+placRevenue(p),0);
+    const revCY=cyPlacements.reduce((s,p)=>s+placRevenue(p),0);
+    const revPY=pyPlacements.reduce((s,p)=>s+placRevenue(p),0);
+    const contractMarginL12M=l12Placements.filter(isContract).reduce((s,p)=>s+placRevenue(p),0);
+    const permFeesL12M=l12Placements.filter(isPerm).reduce((s,p)=>s+placRevenue(p),0);
+    const sowMarginL12M=l12Placements.filter(isSoW).reduce((s,p)=>s+placRevenue(p),0);
+    const newDealL12M=l12Placements.filter(isNewDeal).length;
+    const extensionL12M=l12Placements.filter(isExtension).length;
+    const replacementL12M=l12Placements.filter(isReplacement).length;
+    const commercialPlacements=l12Placements.filter(p=>!isExtension(p));
+    const placCY=cyPlacements.filter(p=>!isExtension(p)).length;
+    const placPY=pyPlacements.filter(p=>!isExtension(p)).length;
     const jobsCY=allJobs.filter(j=>j.dateAdded>=CY_START).length;
     const jobsPY=allJobs.filter(j=>j.dateAdded>=PY_START&&j.dateAdded<=PY_END).length;
-    const activePlacs=placements.filter(p=>{const st=(p.status||'').toLowerCase();return(st==='approved'||st==='extension')&&p.dateEnd&&p.dateEnd>now;});
+    const activePlacs=placements.filter(isLiveContractor);
+    const pendingPlacs=placements.filter(isPendingPlacement);
     const endingSoon=activePlacs.filter(p=>daysFrom(p.dateEnd)<=30);
     const totalPlacs=placements.length;
-    const fillRate=allJobs.length>0?Math.round(totalPlacs/allJobs.length*100):0;
+    const countedPlacements=placements.filter(p=>!isExtension(p)).length;
+    const fillRate=allJobs.length>0?Math.round(countedPlacements/allJobs.length*100):0;
     const ttfAll=placements.filter(p=>p.jobOrder?.dateAdded&&p.dateBegin).map(p=>Math.round((p.dateBegin-p.jobOrder.dateAdded)/ONE_DAY)).filter(d=>d>0&&d<365);
     const avgTTF=avgArr(ttfAll);
     const totSubs=jm.reduce((s,x)=>s+x.m.subs,0);
@@ -185,7 +241,7 @@
 
     // Leaderboard
     const consultantMap={};
-    placements.forEach(p=>{if(!p.owner)return;const n=p.owner.firstName+' '+p.owner.lastName,id=p.owner.id;if(!consultantMap[id])consultantMap[id]={name:n,placs:0,rev:0,active:0};consultantMap[id].placs++;consultantMap[id].rev+=placRevenue(p);const st=(p.status||'').toLowerCase();if((st==='approved'||st==='extension')&&p.dateEnd&&p.dateEnd>now)consultantMap[id].active++;});
+    placements.forEach(p=>{if(!p.owner)return;const n=p.owner.firstName+' '+p.owner.lastName,id=p.owner.id;if(!consultantMap[id])consultantMap[id]={name:n,placs:0,newDeals:0,extensions:0,rev:0,active:0};consultantMap[id].placs++;if(isNewDeal(p))consultantMap[id].newDeals++;if(isExtension(p))consultantMap[id].extensions++;consultantMap[id].rev+=placRevenue(p);if(isLiveContractor(p))consultantMap[id].active++;});
     const leaderboard=Object.values(consultantMap).sort((a,b)=>b.placs-a.placs).slice(0,6);
 
     // Whitespace
@@ -195,11 +251,11 @@
 
     // ── Trend data — by year ──
     const years={};
-    allJobs.forEach(j=>{const yr=new Date(j.dateAdded).getFullYear();if(!years[yr])years[yr]={jobs:0,placs:0,ttfDays:[],margins:[],billRates:[]};years[yr].jobs++;});
+    allJobs.forEach(j=>{const yr=new Date(j.dateAdded).getFullYear();if(!years[yr])years[yr]={jobs:0,placs:0,newDeals:0,extensions:0,replacements:0,ttfDays:[],margins:[],billRates:[]};years[yr].jobs++;});
     placements.filter(p=>p.dateBegin).forEach(p=>{
       const yr=new Date(p.dateBegin).getFullYear();
-      if(!years[yr])years[yr]={jobs:0,placs:0,ttfDays:[],margins:[],billRates:[]};
-      years[yr].placs++;
+      if(!years[yr])years[yr]={jobs:0,placs:0,newDeals:0,extensions:0,replacements:0,ttfDays:[],margins:[],billRates:[]};
+      years[yr].placs++;if(isNewDeal(p))years[yr].newDeals++;if(isExtension(p))years[yr].extensions++;if(isReplacement(p))years[yr].replacements++;
       if(p.jobOrder?.dateAdded&&p.dateBegin){const d=Math.round((p.dateBegin-p.jobOrder.dateAdded)/ONE_DAY);if(d>0&&d<365)years[yr].ttfDays.push(d);}
       const m=dailyMargin(p);if(m!==null&&m>0)years[yr].margins.push(m);
       if(p.clientBillRate)years[yr].billRates.push(p.clientBillRate);
@@ -232,7 +288,7 @@
     else if(daysSinceContact!==null&&daysSinceContact<=3)insights.push({type:'good',icon:'✅',msg:`Active account — last contact ${daysSinceContact}d ago`});
     if(openOpps.length>0)insights.push({type:'info',icon:'🎯',msg:`${openOpps.length} open opportunit${openOpps.length>1?'ies':'y'} in pipeline`});
     if(avgTTF)insights.push({type:'info',icon:'⏱',msg:`Avg ${avgTTF} days to fill at this account`});
-    if(fillRate>0)insights.push({type:'info',icon:'📊',msg:`${fillRate}% all-time fill rate — ${totalPlacs} placements from ${allJobs.length} jobs`});
+    if(fillRate>0)insights.push({type:'info',icon:'📊',msg:`${fillRate}% fill rate — ${countedPlacements} non-extension placements from ${allJobs.length} jobs`});
     if(insights.length===0)insights.push({type:'good',icon:'✅',msg:'No issues flagged — account looks healthy'});
 
     const cyYr=new Date().getFullYear(),pyYr=cyYr-1;
@@ -249,160 +305,133 @@
       return entries.map(e=>`<div class="bar-row"><div class="bar-label">${e.yr}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(e.v.num/mx*100)}%;background:${color}"></div></div><div class="bar-val" style="color:${color}">${e.v.label}</div></div>`).join('');
     }
 
+    const marginAtRisk30=endingSoon.reduce((s,p)=>s+placRevenue(p),0);
+    const ending60=activePlacs.filter(p=>daysFrom(p.dateEnd)>30&&daysFrom(p.dateEnd)<=60);
+    const ending90=activePlacs.filter(p=>daysFrom(p.dateEnd)>60&&daysFrom(p.dateEnd)<=90);
+    const totalSplit=Math.max(1,contractMarginL12M+permFeesL12M+sowMarginL12M);
+    const contractPct=Math.round(contractMarginL12M/totalSplit*100);
+    const permPct=Math.round(permFeesL12M/totalSplit*100);
+    const sowPct=Math.max(0,100-contractPct-permPct);
+    const actionItems=insights.slice(0,4);
+    if(actionItems.length<4&&endingSoon.length>0)actionItems.push({type:'warn',icon:'⏰',msg:`Call ${endingSoon[0].candidate?endingSoon[0].candidate.firstName+' '+endingSoon[0].candidate.lastName:'the contractor'} about extension before ${fmtDate(endingSoon[0].dateEnd)}`});
+    if(actionItems.length<4&&openJobs.length>0)actionItems.push({type:'info',icon:'🎯',msg:`Review ${openJobs.length} open job${openJobs.length>1?'s':''} and agree next CV/interview actions`});
+    if(actionItems.length<4&&contactsGoneCold.length>0)actionItems.push({type:'warn',icon:'📞',msg:`Re-engage ${contactsGoneCold[0].firstName} ${contactsGoneCold[0].lastName}; contact is 60+ days cold`});
+    while(actionItems.length<4)actionItems.push({type:'good',icon:'✅',msg:'No urgent risk found — maintain regular account touchpoints'});
+
+    const contractorRows = activePlacs.sort((a,b)=>a.dateEnd-b.dateEnd).slice(0,8).map(p=>{const name=p.candidate?p.candidate.firstName+' '+p.candidate.lastName:'—';const pp=placPill(p);const left=p.dateEnd?daysFrom(p.dateEnd):null;const ragC=left===null?'rag-gray':left<0?'rag-red':left<=30?'rag-yellow':'rag-green';const margin=dailyMargin(p);return`<div class="row"><div class="rag ${ragC}"></div><div class="row-info"><div class="row-title">${p.candidate?.id?`<a href="${recUrl('Candidate',p.candidate.id)}" target="_blank">${esc(name)}</a>`:esc(name)}</div><div class="row-meta">${esc(p.jobOrder?.title||'—')} · ${p.owner?p.owner.firstName+' '+p.owner.lastName:'—'} · £${p.clientBillRate||0} bill / £${p.payRate||0} pay${margin!==null?' · £'+Math.round(margin)+' margin/day':''}</div></div><div class="row-right">${p.customText8?`<span class="pill ${dealPill(p)}">${esc(dealTypeLabel(p.customText8))}</span>`:''}<span class="pill ${typePill(p.employmentType)}">${esc(employmentTypeLabel(p.employmentType))}</span><span class="pill ${pp.cls}">${pp.label}</span></div></div>`;}).join('');
+    const renewalRows = activePlacs.sort((a,b)=>a.dateEnd-b.dateEnd).slice(0,8).map(p=>{const name=p.candidate?p.candidate.firstName+' '+p.candidate.lastName:'—';const left=p.dateEnd?daysFrom(p.dateEnd):null;const margin=dailyMargin(p);const cls=left<=14?'rag-red':left<=30?'rag-yellow':'rag-blue';return`<div class="row"><div class="rag ${cls}"></div><div class="row-info"><div class="row-title">${esc(name)} <span style="color:#667085;font-weight:500">· ${left}d left</span></div><div class="row-meta">Ends ${fmtDate(p.dateEnd)} · ${esc(p.jobOrder?.title||'—')} · ${margin!==null?'£'+Math.round(margin)+'/day margin':'margin unknown'}</div></div><div class="row-right"><span class="pill ${left<=30?'p-yellow':'p-gray'}">${left<=30?'Action':'Monitor'}</span></div></div>`;}).join('');
+    const jobRows = jm.slice(0,8).map(({j,m})=>{const owner=j.owner?j.owner.firstName+' '+j.owner.lastName:'—';const cc=j.clientContact?j.clientContact.firstName+' '+j.clientContact.lastName:'no contact';return`<div class="row"><div class="rag rag-${m.rag}"></div><div class="row-info"><div class="row-title"><a href="${recUrl('JobOrder',j.id)}" target="_blank">${esc(j.title||'Untitled')}</a></div><div class="row-meta">${esc(owner)} · via ${esc(cc)} · ${m.daysOpen}d open · ${m.subs>0?'last CV '+m.daysSinceSub+'d ago':'no CVs sent'}</div></div><div class="row-right"><span class="pill ${m.rag==='red'?'p-red':m.rag==='yellow'?'p-yellow':'p-green'}">${m.subs} CV · ${m.interviews} int</span></div></div>`;}).join('');
+
     const html=`
-      <div class="topbar">
-        <div>
-          <div class="topbar-title">Account Management</div>
-          <div class="topbar-sub">${openJobs.length} open jobs · ${activePlacs.length} contractors on-site · ${contacts.length} contacts · ${openOpps.length} opportunities · last activity ${daysSinceContact!==null?daysSinceContact+'d ago':'unknown'}</div>
-        </div>
-        <div class="badges">
-          ${openJobs.length?`<span class="badge b-blue">${openJobs.length} open</span>`:''}
-          ${atRisk?`<span class="badge b-red">${atRisk} at risk</span>`:''}
-          ${activePlacs.length?`<span class="badge b-green">${activePlacs.length} on-site</span>`:''}
-          ${endingSoon.length?`<span class="badge b-yellow">${endingSoon.length} ending soon</span>`:''}
-          ${openOpps.length?`<span class="badge b-purple">${openOpps.length} opps</span>`:''}
-        </div>
-      </div>
-      <div class="briefing">
-        <div class="briefing-icon">✦</div>
-        <div>
-          <div class="briefing-label">AI Account Summary</div>
-          <div class="briefing-text" id="ai-text" style="color:var(--muted);font-style:italic">Generating summary and suggested actions…</div>
-        </div>
-        <div class="briefing-actions">
-          <div class="briefing-label">Suggested Actions</div>
-          <div class="action-grid">
-            ${insights.slice(0,4).map(i=>`<div class="action-item">${esc(i.msg)}</div>`).join('')}
+      <div class="dashboard-shell">
+        <div class="dash-header">
+          <div>
+            <div class="dash-eyebrow">Account Management</div>
+            <div class="dash-title">Commercial account dashboard</div>
+            <div class="dash-subtitle">Margin-led view using contract margin, permanent fees, live contractors, renewal risk and deal type split.</div>
+          </div>
+          <div class="dash-status">
+            <span class="badge b-blue">${openJobs.length} open jobs</span>
+            ${atRisk?`<span class="badge b-red">${atRisk} at risk</span>`:''}
+            <span class="badge b-green">${activePlacs.length} live contractors</span>
+            ${pendingPlacs.length?`<span class="badge b-yellow">${pendingPlacs.length} pending starts</span>`:''}
+            ${openOpps.length?`<span class="badge b-purple">${openOpps.length} opps</span>`:''}
           </div>
         </div>
-        <div class="mini-health">
-          <div class="briefing-label">Account Health</div>
-          <div class="mini-health-score" style="color:${healthColor}">${health}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${healthLabel}</div>
-          <div class="health-bar-outer" style="margin-top:8px"><div class="health-bar-inner" style="width:${health}%;background:${healthColor}"></div></div>
-        </div>
-      </div>
-      <div class="insight-strip">
-        ${insights.slice(0,4).map(i=>`<div class="insight-tile ${i.type}"><strong>${i.icon}</strong> ${esc(i.msg)}</div>`).join('')}
-      </div>
-      <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-icon kpi-purple">£</div><div><div class="kpi-title">Gross Margin (L12M)</div><div class="kpi-value">${fmtGBP(revL12M)}</div><div class="kpi-sub">Margin = Bill Rate - Pay Rate</div>${revDP!==null?`<div class="kpi-delta">${revDP>=0?'↑':'↓'} ${Math.abs(revDP)}% vs prior year</div>`:''}</div></div>
-        <div class="kpi-card"><div class="kpi-icon kpi-blue">👥</div><div><div class="kpi-title">Active Contractors</div><div class="kpi-value">${activePlacs.length}</div><div class="kpi-sub">Across active placements</div><div class="kpi-delta">${endingSoon.length?endingSoon.length+' ending soon':'Book stable'}</div></div></div>
-        <div class="kpi-card"><div class="kpi-icon kpi-green">📅</div><div><div class="kpi-title">Contractors Ending 30 Days</div><div class="kpi-value">${endingSoon.length}</div><div class="kpi-sub">Renewal risk / extension focus</div><div class="kpi-delta">${fmtGBP(endingSoon.reduce((s,p)=>s+placRevenue(p),0))} margin at risk</div></div></div>
-        <div class="kpi-card"><div class="kpi-icon kpi-orange">🎯</div><div><div class="kpi-title">Active Opportunities</div><div class="kpi-value">${openOpps.length}</div><div class="kpi-sub">Open opportunity pipeline</div><div class="kpi-delta">${wonOpps.length} won all time</div></div></div>
-        <div class="kpi-card"><div class="kpi-icon kpi-yellow">🏆</div><div><div class="kpi-title">Placements (L12M)</div><div class="kpi-value">${placements.filter(p=>p.dateBegin&&p.dateBegin>=L12M).length}</div><div class="kpi-sub">From recent account activity</div>${plDP!==null?`<div class="kpi-delta">${plDP>=0?'↑':'↓'} ${Math.abs(plDP)}% vs prior year</div>`:''}</div></div>
-        <div class="kpi-card"><div class="kpi-icon kpi-red">📄</div><div><div class="kpi-title">Lifetime Margin</div><div class="kpi-value">${fmtGBP(revAll)}</div><div class="kpi-sub">${totalPlacs} total placements</div><div class="kpi-delta">${fillRate}% fill rate</div></div></div>
-      </div>
-      <div class="page">
 
-        <!-- LEFT COL -->
-        <div class="col">
-          <div class="card">
-            <div class="card-head"><span class="card-title">Account Health</span><span class="card-count" style="color:${healthColor}">${health}/100</span></div>
-            <div class="health">
-              <div><div class="health-score" style="color:${healthColor}">${health}</div><div style="font-size:9px;color:var(--muted)">/100</div></div>
-              <div class="health-right">
-                <div class="health-label" style="color:${healthColor}">${healthLabel}</div>
-                <div class="health-bar-outer"><div class="health-bar-inner" style="width:${health}%;background:${healthColor}"></div></div>
-                <div class="health-detail">Margin · pipeline · contact recency · contractors · opportunities</div>
+        <div class="hero-grid">
+          <div class="hero-card">
+            <div class="section-label">AI Account Summary</div>
+            <div class="hero-text" id="ai-text" style="color:var(--muted);font-style:italic">Generating action-led summary…</div>
+          </div>
+          <div class="action-panel">
+            <div class="section-label">Suggested Actions</div>
+            <div class="action-list">
+              ${actionItems.map(i=>`<div class="action-card ${i.type}"><div class="action-dot">${esc(i.icon||'!')}</div><div class="action-copy">${esc(i.msg)}</div></div>`).join('')}
+            </div>
+          </div>
+          <div class="health-panel" style="--score:${health};--ring-color:${healthColor}">
+            <div class="section-label" style="text-align:center;margin-bottom:6px">Account Health</div>
+            <div class="health-ring"><span>${health}</span></div>
+            <div class="health-panel-title" style="color:${healthColor}">${healthLabel}</div>
+            <div class="health-panel-sub">Margin · jobs · activity · renewals</div>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-icon kpi-purple">£</div><div><div class="kpi-title">Gross Margin L12M</div><div class="kpi-value">${fmtGBP(revL12M)}</div><div class="kpi-sub">Contract margin + perm fees + SoW</div>${revDP!==null?`<div class="kpi-delta">${revDP>=0?'↑':'↓'} ${Math.abs(revDP)}% vs PY</div>`:''}</div></div>
+          <div class="kpi-card"><div class="kpi-icon kpi-blue">↔</div><div><div class="kpi-title">Contract Margin</div><div class="kpi-value">${fmtGBP(contractMarginL12M)}</div><div class="kpi-sub">Bill rate - pay rate</div><div class="kpi-delta">${contractPct}% of L12M mix</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon kpi-green">●</div><div><div class="kpi-title">Perm Fees</div><div class="kpi-value">${fmtGBP(permFeesL12M)}</div><div class="kpi-sub">Permanent placement fees</div><div class="kpi-delta">${permPct}% of L12M mix</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon kpi-orange">👥</div><div><div class="kpi-title">Live Contractors</div><div class="kpi-value">${activePlacs.length}</div><div class="kpi-sub">Released + started + not ended</div><div class="kpi-delta">${pendingPlacs.length} pending starts</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon kpi-yellow">⏰</div><div><div class="kpi-title">Ending 30 Days</div><div class="kpi-value">${endingSoon.length}</div><div class="kpi-sub">${fmtGBP(marginAtRisk30)} margin at risk</div><div class="kpi-delta">${ending60.length} ending 31-60d</div></div></div>
+          <div class="kpi-card"><div class="kpi-icon kpi-red">◆</div><div><div class="kpi-title">Deals L12M</div><div class="kpi-value">${commercialPlacements.length}</div><div class="kpi-sub">${newDealL12M} new · ${replacementL12M} repl</div><div class="kpi-delta">${extensionL12M} extensions tracked</div></div></div>
+        </div>
+
+        <div class="priority-grid">
+          <div class="priority-card">
+            <div class="card-head"><span class="card-title">Revenue split</span><span class="card-count">L12M margin basis</span></div>
+            <div class="split-grid">
+              <div class="split-card"><div class="split-label">Contract</div><div class="split-value c-blue">${fmtGBP(contractMarginL12M)}</div><div class="split-sub">${contractPct}% · live margin focus</div></div>
+              <div class="split-card"><div class="split-label">Permanent</div><div class="split-value c-green">${fmtGBP(permFeesL12M)}</div><div class="split-sub">${permPct}% · fee income</div></div>
+              <div class="split-card"><div class="split-label">SoW</div><div class="split-value c-purple">${fmtGBP(sowMarginL12M)}</div><div class="split-sub">${sowPct}% · statement of work</div></div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-top"><span>Commercial mix</span><span>${fmtGBP(revL12M)}</span></div>
+              <div class="progress-track"><div class="progress-contract" style="width:${contractPct}%"></div><div class="progress-perm" style="width:${permPct}%"></div><div class="progress-sow" style="width:${sowPct}%"></div></div>
+            </div>
+          </div>
+          <div class="priority-card">
+            <div class="card-head"><span class="card-title">Placement split</span><span class="card-count">customText8</span></div>
+            <div class="split-grid">
+              <div class="split-card"><div class="split-label">New Deal</div><div class="split-value c-green">${newDealL12M}</div><div class="split-sub">new wins</div></div>
+              <div class="split-card"><div class="split-label">Extension</div><div class="split-value c-yellow">${extensionL12M}</div><div class="split-sub">not counted as new</div></div>
+              <div class="split-card"><div class="split-label">Replacement</div><div class="split-value c-purple">${replacementL12M}</div><div class="split-sub">separate from extensions</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="col">
+            <div class="card">
+              <div class="card-head"><span class="card-title">Renewal / extension risk</span><span class="card-count">${endingSoon.length} under 30d · ${ending60.length} under 60d · ${ending90.length} under 90d</span></div>
+              <div class="rows compact">${renewalRows||'<div class="empty">No active contractors found</div>'}</div>
+            </div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Live contractors</span><span class="card-count">${activePlacs.length} live · ${pendingPlacs.length} pending</span></div>
+              <div class="rows compact">${contractorRows||'<div class="empty">No live contractors</div>'}</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="card-head"><span class="card-title">Open jobs needing action</span><span class="card-count">${openJobs.length} open · ${atRisk} at risk</span></div>
+              <div class="rows compact">${jobRows||'<div class="empty">No open jobs</div>'}</div>
+            </div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Pipeline funnel</span><span class="card-count">open jobs only</span></div>
+              <div class="funnel">
+                <div class="funnel-row"><div class="funnel-label">CVs sent</div><div class="funnel-track"><div class="funnel-fill" style="width:100%"></div></div><div class="funnel-val">${totSubs}</div><div class="funnel-money"></div></div>
+                <div class="funnel-row"><div class="funnel-label">Interviews</div><div class="funnel-track"><div class="funnel-fill" style="width:${totSubs?Math.round(totInt/Math.max(totSubs,1)*100):0}%"></div></div><div class="funnel-val">${totInt}</div><div class="funnel-money">${totSubs?Math.round(totInt/totSubs*100):0}%</div></div>
+                <div class="funnel-row"><div class="funnel-label">Placed</div><div class="funnel-track"><div class="funnel-fill" style="width:${totSubs?Math.round(totPlacOpen/Math.max(totSubs,1)*100):0}%;background:linear-gradient(90deg,#34d399,#16a35f)"></div></div><div class="funnel-val">${totPlacOpen}</div><div class="funnel-money">${totSubs?Math.round(totPlacOpen/totSubs*100):0}%</div></div>
               </div>
             </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Pipeline Snapshot</span></div>
-            <div class="stat-grid sg-2">
-              <div class="stat"><div class="stat-label">Open Jobs</div><div class="stat-value ${atRisk?'c-yellow':''}">${openJobs.length}</div><div class="stat-sub">${atRisk?`<span class="c-red">${atRisk} at risk</span>`:'all active'}</div></div>
-              <div class="stat"><div class="stat-label">CVs / Interviews</div><div class="stat-value">${totSubs}</div><div class="stat-sub">${totInt} at interview</div></div>
-              <div class="stat"><div class="stat-label">Contractors</div><div class="stat-value ${activePlacs.length?'c-green':'c-yellow'}">${activePlacs.length}</div><div class="stat-sub">${endingSoon.length?`<span class="c-red">${endingSoon.length} ending soon</span>`:totalPlacs+' all time'}</div></div>
-              <div class="stat"><div class="stat-label">Opportunities</div><div class="stat-value c-purple">${openOpps.length}</div><div class="stat-sub">${wonOpps.length} won all time</div></div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Open opportunities</span><span class="card-count">${openOpps.length} open · ${opps.length} total</span></div>
+              <div class="rows compact">${openOpps.length?openOpps.slice(0,6).map(o=>`<div class="row"><div class="rag rag-blue"></div><div class="row-info"><div class="row-title"><a href="${recUrl('Opportunity',o.id)}" target="_blank">${esc(o.title||'Untitled')}</a></div><div class="row-meta">${o.owner?o.owner.firstName+' '+o.owner.lastName:'—'} · via ${o.clientContact?o.clientContact.firstName+' '+o.clientContact.lastName:'—'} · ${fmtDate(o.dateAdded)}</div></div><span class="pill p-gray">${esc(o.status||'—')}</span></div>`).join(''):'<div class="empty">No open opportunities</div>'}</div>
             </div>
           </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Commercial Margin</span></div>
-            <div class="stat-grid sg-2">
-              <div class="stat"><div class="stat-label">Gross Margin L12M</div><div class="stat-value c-green">${fmtGBP(revL12M)}</div><div class="stat-sub">Contract = bill rate - pay rate</div></div>
-              <div class="stat"><div class="stat-label">Lifetime Margin</div><div class="stat-value">${fmtGBP(revAll)}</div><div class="stat-sub">${totalPlacs} placements</div></div>
-              <div class="stat"><div class="stat-label">Fill Rate</div><div class="stat-value ${fillRate>=50?'c-green':fillRate>=30?'c-yellow':'c-red'}">${fillRate}%</div><div class="stat-sub">${totalPlacs} of ${allJobs.length} jobs</div></div>
-              <div class="stat"><div class="stat-label">Avg Time to Fill</div><div class="stat-value">${avgTTF||'—'}</div><div class="stat-sub">${avgTTF?'days avg':''}</div></div>
+          <div class="col">
+            <div class="card">
+              <div class="card-head"><span class="card-title">Key contacts</span><span class="card-count">${contactsGoneCold.length} cold · ${contactsNeverContacted.length} never contacted</span></div>
+              <div class="rows compact">${enrichedContacts.slice(0,8).map(c=>{const name=(c.firstName||'').trim()+' '+(c.lastName||'').trim();const la=c.lastActivity;return`<div class="row"><div class="rag ${contactRag(c)}"></div><div class="avatar">${initials(c.firstName,c.lastName)}</div><div class="row-info"><div class="row-title"><a href="${recUrl('ClientContact',c.id)}" target="_blank">${esc(name.trim())}</a>${c.jobsRaised>0?` <span style="color:#16a35f;font-size:10px">· ${c.jobsRaised} job${c.jobsRaised>1?'s':''}</span>`:''}</div><div class="row-meta">${esc(c.occupation||'—')}</div></div><div class="contact-pills">${!la?'<span class="pill p-red">never</span>':daysAgo(la.date)>60?`<span class="pill p-yellow">cold · ${daysAgo(la.date)}d</span>`:`<span class="pill p-gray">${daysAgo(la.date)}d</span>`}</div></div>`;}).join('')||'<div class="empty">No contacts</div>'}</div>
             </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">YTD vs Prior Year</span></div>
-            <div class="ytd-grid">
-              <div class="ytd-cell"><div class="ytd-label">Margin</div><div class="ytd-vals"><div class="ytd-val c-green">${fmtGBP(revCY)}</div><div class="ytd-val" style="color:var(--muted)">${fmtGBP(revPY)}</div></div><div class="ytd-sub">${cyYr} vs ${pyYr}</div>${revDP!==null?`<div class="ytd-delta ${revDP>=0?'c-green':'c-red'}">${revDP>=0?'↑':'↓'} ${Math.abs(revDP)}% YoY</div>`:''}</div>
-              <div class="ytd-cell"><div class="ytd-label">Placements</div><div class="ytd-vals"><div class="ytd-val c-green">${placCY}</div><div class="ytd-val" style="color:var(--muted)">${placPY}</div></div><div class="ytd-sub">${cyYr} vs ${pyYr}</div>${plDP!==null?`<div class="ytd-delta ${plDP>=0?'c-green':'c-red'}">${plDP>=0?'↑':'↓'} ${Math.abs(plDP)}% YoY</div>`:''}</div>
-              <div class="ytd-cell"><div class="ytd-label">Jobs Raised</div><div class="ytd-vals"><div class="ytd-val c-green">${jobsCY}</div><div class="ytd-val" style="color:var(--muted)">${jobsPY}</div></div><div class="ytd-sub">${cyYr} vs ${pyYr}</div>${jDP!==null?`<div class="ytd-delta ${jDP>=0?'c-green':'c-red'}">${jDP>=0?'↑':'↓'} ${Math.abs(jDP)}% YoY</div>`:''}</div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Consultant leaderboard</span><span class="card-count">new vs extension</span></div>
+              ${leaderboard.length?leaderboard.map((c,i)=>`<div class="bar-row"><div class="bar-label" style="width:120px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'   '} ${esc(c.name)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(c.placs/maxLead*100)}%;background:var(--blue)"></div></div><div class="bar-val" style="color:var(--blue)">${c.placs} <span style="color:var(--muted);font-size:9px">· ${c.newDeals} new · ${c.extensions} ext</span></div></div>`).join(''):'<div class="empty">No data</div>'}
             </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Insights</span><span class="card-count">${insights.length}</span></div>
-            <div class="insight-list">${insights.map(i=>`<div class="insight ${i.type}"><span class="insight-icon">${i.icon}</span><span>${esc(i.msg)}</span></div>`).join('')}</div>
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Bill Rate Trend</span><span class="card-count">avg £/day by year</span></div>
-            ${trendBars(trendYears,'var(--purple)',d=>{const a=avgArr(d.billRates);return a?{num:a,label:'£'+a+'/day'}:null;})}
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Margin Trend</span><span class="card-count">avg £/day margin by year</span></div>
-            ${trendBars(trendYears,'var(--green)',d=>{const a=avgArr(d.margins);return a?{num:Math.round(a),label:'£'+Math.round(a)+'/day'}:null;})}
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Jobs Added Trend</span><span class="card-count">vacancies raised per year</span></div>
-            ${trendBars(trendYears,'var(--blue)',d=>d.jobs>0?{num:d.jobs,label:d.jobs+' jobs'}:null)}
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Fill Rate Trend</span><span class="card-count">placements per year</span></div>
-            ${(()=>{const mx=Math.max(...trendYears.map(([yr,d])=>d.placs),1);return trendYears.map(([yr,d])=>{if(!d.placs&&!d.jobs)return'';const rate=d.jobs>0?Math.round(d.placs/d.jobs*100):0;const col=rate>=50?'var(--green)':rate>0?'var(--yellow)':'var(--red)';return`<div class="bar-row"><div class="bar-label">${yr}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.placs/mx*100)}%;background:${col}"></div></div><div class="bar-val" style="color:${col}">${d.placs} plac <span style="font-size:9px">${rate}%</span></div></div>`;}).join('')||'<div class="empty">No data</div>';})()}
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Time to Fill Trend</span><span class="card-count">avg days job → placement</span></div>
-            ${trendBars(trendYears,'var(--yellow)',d=>{const a=avgArr(d.ttfDays);return a?{num:a,label:a+'d avg'}:null;})}
-          </div>
-        </div>
-
-        <!-- MIDDLE COL -->
-        <div class="col">
-          <div class="card">
-            <div class="card-head"><span class="card-title">Pipeline Funnel</span><span class="card-count">open jobs only</span></div>
-            <div class="funnel">
-              <div class="f-step"><div class="f-val">${totSubs}</div><div class="f-bar" style="background:rgba(88,166,255,.4);height:${Math.max(8,totSubs?60:8)}px"></div><div class="f-lbl">CVs Sent</div></div>
-              <div class="f-arrow">›</div>
-              <div class="f-step"><div class="f-val">${totInt}</div><div class="f-bar" style="background:rgba(210,153,34,.5);height:${Math.max(4,totSubs?Math.round(totInt/Math.max(totSubs,1)*60):4)}px"></div><div class="f-lbl">Interviews</div><div class="f-pct">${totSubs?Math.round(totInt/totSubs*100)+'%':''}</div></div>
-              <div class="f-arrow">›</div>
-              <div class="f-step"><div class="f-val">${totPlacOpen}</div><div class="f-bar" style="background:rgba(63,185,80,.5);height:${Math.max(4,totSubs?Math.round(totPlacOpen/Math.max(totSubs,1)*60):4)}px"></div><div class="f-lbl">Placed</div><div class="f-pct">${totSubs?Math.round(totPlacOpen/totSubs*100)+'%':''}</div></div>
+            <div class="card">
+              <div class="card-head"><span class="card-title">Recent activity</span><span class="card-count">${notes.length} notes loaded</span></div>
+              <div class="rows compact">${notes.slice(0,6).map(n=>{const who=n.commentingPerson?n.commentingPerson.firstName+' '+n.commentingPerson.lastName:'—';const contact=n.personReference?n.personReference.firstName+' '+n.personReference.lastName:'—';const body=(n.comments||'').replace(/<[^>]+>/g,'').trim().substring(0,64);return`<div class="row"><div class="rag rag-gray"></div><div class="row-info"><div class="row-title">${esc(n.action||'Note')} · <span style="font-weight:400;color:var(--muted)">${esc(who)} → ${esc(contact)}</span></div><div class="row-meta">${fmtDate(n.dateAdded)}${body?' — '+esc(body):''}</div></div></div>`;}).join('')||'<div class="empty">No notes</div>'}</div>
             </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Open Jobs</span><span class="card-count">${openJobs.length}</span></div>
-            <div class="rows">${jm.length?jm.map(({j,m})=>{const owner=j.owner?j.owner.firstName+' '+j.owner.lastName:'—';const cc=j.clientContact?j.clientContact.firstName+' '+j.clientContact.lastName:'no contact';return`<div class="row"><div class="rag rag-${m.rag}"></div><div class="row-info"><div class="row-title"><a href="${recUrl('JobOrder',j.id)}" target="_blank">${esc(j.title||'Untitled')}</a></div><div class="row-meta">${esc(owner)} · via ${esc(cc)} · ${m.daysOpen}d · ${m.subs>0?'last CV '+m.daysSinceSub+'d ago':'no CVs'}</div></div><div class="row-right"><div class="nums"><div class="num"><div class="num-val ${m.subs===0?'c-red':''}">${m.subs}</div><div class="num-lbl">CVs</div></div><div class="num"><div class="num-val">${m.interviews}</div><div class="num-lbl">Int</div></div><div class="num"><div class="num-val ${m.placs?'c-green':''}">${m.placs}</div><div class="num-lbl">Plac</div></div></div><span class="pill ${typePill(j.employmentType)}">${esc(employmentTypeLabel(j.employmentType))}</span></div></div>`;}).join(''):'<div class="empty">No open jobs</div>'}</div>
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Active Contractors</span><span class="card-count">${activePlacs.length} active · ${totalPlacs} all time</span></div>
-            <div class="rows">${activePlacs.length?activePlacs.sort((a,b)=>a.dateEnd-b.dateEnd).slice(0,12).map(p=>{const name=p.candidate?p.candidate.firstName+' '+p.candidate.lastName:'—';const pp=placPill(p);const left=p.dateEnd?daysFrom(p.dateEnd):null;const ragC=left===null?'rag-gray':left<0?'rag-red':left<=30?'rag-yellow':'rag-green';const margin=dailyMargin(p);return`<div class="row"><div class="rag ${ragC}"></div><div class="row-info"><div class="row-title">${p.candidate?.id?`<a href="${recUrl('Candidate',p.candidate.id)}" target="_blank">${esc(name)}</a>`:esc(name)}</div><div class="row-meta">${esc(p.jobOrder?.title||'—')} · ${p.owner?p.owner.firstName+' '+p.owner.lastName:'—'} · £${p.clientBillRate||0}/day${margin!==null?' · £'+Math.round(margin)+' margin':''} · ends ${fmtDate(p.dateEnd)}</div></div><div class="row-right">${p.customText1?`<span class="pill p-gray">${esc(p.customText1)}</span>`:''}<span class="pill ${typePill(p.employmentType)}">${esc(employmentTypeLabel(p.employmentType))}</span><span class="pill ${pp.cls}">${pp.label}</span></div></div>`;}).join(''):'<div class="empty">No active contractors</div>'}</div>
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Open Opportunities</span><span class="card-count">${openOpps.length} open · ${opps.length} total</span></div>
-            <div class="rows">${openOpps.length?openOpps.slice(0,8).map(o=>`<div class="row"><div class="rag rag-blue"></div><div class="row-info"><div class="row-title"><a href="${recUrl('Opportunity',o.id)}" target="_blank">${esc(o.title||'Untitled')}</a></div><div class="row-meta">${o.owner?o.owner.firstName+' '+o.owner.lastName:'—'} · via ${o.clientContact?o.clientContact.firstName+' '+o.clientContact.lastName:'—'} · ${fmtDate(o.dateAdded)}</div></div><span class="pill ${(o.status||'').toLowerCase()==='won'?'p-perm':(o.status||'').toLowerCase()==='lost'?'p-red':(o.status||'').toLowerCase().includes('discovery')?'p-yellow':'p-gray'}">${esc(o.status||'—')}</span></div>`).join(''):'<div class="empty">No open opportunities</div>'}</div>
-          </div>
-        </div>
-
-        <!-- RIGHT COL -->
-        <div class="col">
-          <div class="card">
-            <div class="card-head"><span class="card-title">Contacts</span><span class="card-count">${contactsWithJobs.length} raised jobs · ${contactsNeverContacted.length} never contacted · ${contactsGoneCold.length} cold</span></div>
-            <div class="rows">${enrichedContacts.slice(0,12).map(c=>{const name=(c.firstName||'').trim()+' '+(c.lastName||'').trim();const la=c.lastActivity;return`<div class="row"><div class="rag ${contactRag(c)}"></div><div class="avatar">${initials(c.firstName,c.lastName)}</div><div class="row-info"><div class="row-title"><a href="${recUrl('ClientContact',c.id)}" target="_blank">${esc(name.trim())}</a>${c.jobsRaised>0?` <span style="color:var(--green);font-size:10px">· ${c.jobsRaised} job${c.jobsRaised>1?'s':''}</span>`:''}</div><div class="row-meta">${esc(c.occupation||'—')}</div></div><div class="contact-pills"><span class="pill ${c.jobsRaised>0?'p-green':'p-gray'}">${c.jobsRaised>0?c.jobsRaised+' jobs':'no jobs'}</span>${!la?'<span class="pill p-red" style="font-size:8px">never contacted</span>':daysAgo(la.date)>60?`<span class="pill p-yellow" style="font-size:8px">cold · ${daysAgo(la.date)}d</span>`:`<span class="pill p-gray" style="font-size:8px">${esc(la.action||'note')} · ${daysAgo(la.date)}d</span>`}</div></div>`;}).join('')||'<div class="empty">No contacts</div>'}</div>
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Consultant Leaderboard</span><span class="card-count">placements at this account</span></div>
-            ${leaderboard.length?leaderboard.map((c,i)=>`<div class="bar-row"><div class="bar-label" style="width:120px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'   '} ${esc(c.name)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(c.placs/maxLead*100)}%;background:var(--blue)"></div></div><div class="bar-val" style="color:var(--blue)">${c.placs} <span style="color:var(--muted);font-size:9px">· ${fmtGBP(c.rev)}</span></div></div>`).join(''):'<div class="empty">No data</div>'}
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Whitespace Analysis</span><span class="card-count">fill rate by category</span></div>
-            ${whitespace.length?whitespace.map(w=>`<div class="bar-row"><div class="bar-label" style="width:120px">${esc(w.cat)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(w.rate)}%;background:${w.rate>=50?'var(--green)':w.rate>0?'var(--yellow)':'var(--red)'}"></div></div><div class="bar-val" style="color:var(--muted)">${w.placs}/${w.jobs} <span style="font-size:9px">${w.rate}%</span></div></div>`).join(''):'<div class="empty">No category data</div>'}
-          </div>
-          <div class="card">
-            <div class="card-head"><span class="card-title">Recent Activity</span><span class="card-count">${notes.length} notes loaded</span></div>
-            <div class="rows">${notes.slice(0,8).map(n=>{const who=n.commentingPerson?n.commentingPerson.firstName+' '+n.commentingPerson.lastName:'—';const contact=n.personReference?n.personReference.firstName+' '+n.personReference.lastName:'—';const body=(n.comments||'').replace(/<[^>]+>/g,'').trim().substring(0,70);return`<div class="row"><div class="rag rag-gray"></div><div class="row-info"><div class="row-title">${esc(n.action||'Note')} · <span style="font-weight:400;color:var(--muted)">${esc(who)} → ${esc(contact)}</span></div><div class="row-meta">${fmtDate(n.dateAdded)}${body?' — '+esc(body):''}</div></div></div>`;}).join('')||'<div class="empty">No notes</div>'}</div>
           </div>
         </div>
       </div>
@@ -417,7 +446,7 @@
       activeContractors:activePlacs.length,endingSoon:endingSoon.length,
       endingSoonNames:endingSoon.slice(0,3).map(p=>p.candidate?p.candidate.firstName+' '+p.candidate.lastName+' (ends '+fmtDate(p.dateEnd)+')':'').filter(Boolean),
       revL12M:Math.round(revL12M),revCY:Math.round(revCY),revPY:Math.round(revPY),revDeltaPct:revDP,
-      totalPlacements:totalPlacs,fillRate,avgTTF,openOpps:openOpps.length,
+      totalPlacements:totalPlacs,countedPlacements,fillRate,avgTTF,openOpps:openOpps.length,contractMarginL12M:Math.round(contractMarginL12M),permFeesL12M:Math.round(permFeesL12M),sowMarginL12M:Math.round(sowMarginL12M),newDealL12M,extensionL12M,replacementL12M,
       contacts:contacts.length,contactsNeverContacted:contactsNeverContacted.length,contactsGoneCold:contactsGoneCold.length,
       keyPersonRisk:keyPersonRisk.map(c=>c.firstName+' '+c.lastName+' ('+c.jobsRaised+' jobs, '+(c.lastActivity?daysAgo(c.lastActivity.date)+'d since contact':'never contacted')+')'),
       topConsultant:leaderboard[0]?leaderboard[0].name+' ('+leaderboard[0].placs+' placements)':null,
@@ -430,7 +459,7 @@
   async function generateBriefing(d){
     const el=document.getElementById('ai-text');
     try{
-      const prompt='You are an expert recruitment account manager assistant at La Fosse Associates. Based on this account data, write a concise 3-4 sentence account summary followed by suggested actions for the account manager today. Be specific with numbers and names. Flowing prose, no bullet points.\n\nAccount data:\n- Health: '+d.healthScore+'/100 ('+d.healthLabel+')\n- Open jobs: '+d.openJobs+' ('+d.atRiskJobs+' at risk)'+(d.jobDetails.filter(j=>j.rag==='red').length?' — '+d.jobDetails.filter(j=>j.rag==='red').map(j=>j.title+' ('+j.daysOpen+'d, '+j.cvs+' CVs)').join(', '):'')+'\n- Contractors on-site: '+d.activeContractors+(d.endingSoon>0?' — '+d.endingSoon+' ending <30d: '+d.endingSoonNames.join(', '):'')+'\n- Gross Margin L12M: £'+d.revL12M.toLocaleString()+' | CY: £'+d.revCY.toLocaleString()+' vs PY: £'+d.revPY.toLocaleString()+(d.revDeltaPct!==null?' ('+d.revDeltaPct+'% YoY)':'')+'\n- Placements: '+d.totalPlacements+' | Fill rate: '+d.fillRate+'% | Avg TTF: '+(d.avgTTF||'unknown')+'d\n- Open opps: '+d.openOpps+'\n- Contacts: '+d.contacts+' total | '+d.contactsNeverContacted+' never contacted | '+d.contactsGoneCold+' cold'+(d.keyPersonRisk.length?'\n- KEY PERSON RISK: '+d.keyPersonRisk.join('; '):'')+'\n- Top consultant: '+(d.topConsultant||'unknown')+'\n- Last activity: '+(d.daysSinceLastActivity!==null?d.daysSinceLastActivity+'d ago ('+d.lastNoteAction+')':'unknown')+(d.whitespaceGaps.length?'\n- Whitespace gaps: '+d.whitespaceGaps.join(', '):'');
+      const prompt='You are an expert recruitment account manager assistant at La Fosse Associates. Based on this account data, write a concise 3-4 sentence account summary followed by suggested actions for the account manager today. Be specific with numbers and names. Flowing prose, no bullet points.\n\nAccount data:\n- Health: '+d.healthScore+'/100 ('+d.healthLabel+')\n- Open jobs: '+d.openJobs+' ('+d.atRiskJobs+' at risk)'+(d.jobDetails.filter(j=>j.rag==='red').length?' — '+d.jobDetails.filter(j=>j.rag==='red').map(j=>j.title+' ('+j.daysOpen+'d, '+j.cvs+' CVs)').join(', '):'')+'\n- Contractors on-site: '+d.activeContractors+(d.endingSoon>0?' — '+d.endingSoon+' ending <30d: '+d.endingSoonNames.join(', '):'')+'\n- Gross Margin L12M: £'+d.revL12M.toLocaleString()+' split as Contract £'+d.contractMarginL12M.toLocaleString()+', Perm £'+d.permFeesL12M.toLocaleString()+', SoW £'+d.sowMarginL12M.toLocaleString()+' | CY: £'+d.revCY.toLocaleString()+' vs PY: £'+d.revPY.toLocaleString()+(d.revDeltaPct!==null?' ('+d.revDeltaPct+'% YoY)':'')+'\n- Placement rows: '+d.totalPlacements+' | Counted deals excluding extensions: '+d.countedPlacements+' | L12M deal split: '+d.newDealL12M+' new, '+d.extensionL12M+' extensions, '+d.replacementL12M+' replacements | Fill rate: '+d.fillRate+'% | Avg TTF: '+(d.avgTTF||'unknown')+'d\n- Open opps: '+d.openOpps+'\n- Contacts: '+d.contacts+' total | '+d.contactsNeverContacted+' never contacted | '+d.contactsGoneCold+' cold'+(d.keyPersonRisk.length?'\n- KEY PERSON RISK: '+d.keyPersonRisk.join('; '):'')+'\n- Top consultant: '+(d.topConsultant||'unknown')+'\n- Last activity: '+(d.daysSinceLastActivity!==null?d.daysSinceLastActivity+'d ago ('+d.lastNoteAction+')':'unknown')+(d.whitespaceGaps.length?'\n- Whitespace gaps: '+d.whitespaceGaps.join(', '):'');
 
       const resp=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
@@ -454,7 +483,7 @@
         else if(d.revDeltaPct!==null&&d.revDeltaPct>10)parts.push(`Margin up ${d.revDeltaPct}% YTD — strong account momentum to maintain.`);
         if(d.daysSinceLastActivity>14)parts.push(`No activity logged in ${d.daysSinceLastActivity} days — schedule an account touchpoint.`);
         if(d.contactsNeverContacted>10)parts.push(`${d.contactsNeverContacted} contacts have never been contacted — significant untapped relationship potential.`);
-        el.textContent=parts.length?parts.join(' '):'Account is active with '+d.openJobs+' open jobs and '+d.activeContractors+' contractors on-site. Fill rate is '+d.fillRate+'% all time.';
+        el.textContent=parts.length?parts.join(' '):'Account is active with '+d.openJobs+' open jobs and '+d.activeContractors+' contractors on-site. Fill rate is '+d.fillRate+'% excluding extensions.';
       }
       console.warn('Claude API unavailable (likely CORS in iframe), using rule-based briefing.',err.message);
     }
