@@ -118,8 +118,8 @@
   const initials=(f,l)=>((f||'')[0]||'').toUpperCase()+((l||'')[0]||'').toUpperCase();
   const workDays=(a,b)=>{let d=0,t=Math.min(a,b);const e=Math.max(a,b);while(t<e){const w=new Date(t).getDay();if(w>0&&w<6)d++;t+=ONE_DAY;}return d;};
   const fmtGBP=n=>n>=1000000?'£'+(n/1000000).toFixed(1)+'m':n>=1000?'£'+Math.round(n/1000)+'k':n>0?'£'+Math.round(n):'£0';
-  const bhUrl=()=>{try{const u=getParam('currentBullhornUrl');return u?new URL(u).origin:'https://app.bullhornstaffing.com';}catch(e){return 'https://app.bullhornstaffing.com';}};
-  const recUrl=(type,id)=>`${bhUrl()}/content/record/${type}/${id}/overview`;
+  const bhUrl=()=>{try{const u=getParam('currentBullhornUrl');return u?new URL(u).origin+'/BullhornSTAFFING':'https://cls20.bullhornstaffing.com/BullhornSTAFFING';}catch(e){return 'https://cls20.bullhornstaffing.com/BullhornSTAFFING';}};
+  const recUrl=(type,id)=>`${bhUrl()}/OpenWindow.cfm?Entity=${type}&id=${id}`;
   const avgArr=arr=>arr.length?Math.round(arr.reduce((s,v)=>s+v,0)/arr.length):null;
 
   let attempts=0;
